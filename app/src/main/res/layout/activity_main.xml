@@ -12,12 +12,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
         android:text="Choose Walpapers"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/morningWallpaperButton"
+        android:id="@+id/chooseMorningWallpaper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -28,27 +29,27 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
-        android:id="@+id/afternoonWallpaperButton"
+        android:id="@+id/chooseAfternoonWallpaper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Afternoon"
         android:textSize="10sp"
-        app:layout_constraintStart_toEndOf="@+id/morningWallpaperButton"
-        app:layout_constraintTop_toTopOf="@+id/morningWallpaperButton" />
+        app:layout_constraintStart_toEndOf="@+id/chooseMorningWallpaper"
+        app:layout_constraintTop_toTopOf="@+id/chooseMorningWallpaper" />
 
     <Button
-        android:id="@+id/eveningWallpaperButton"
+        android:id="@+id/chooseEveningWallpaper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Evening"
         android:textSize="10sp"
-        app:layout_constraintStart_toEndOf="@+id/afternoonWallpaperButton"
-        app:layout_constraintTop_toTopOf="@+id/afternoonWallpaperButton" />
+        app:layout_constraintStart_toEndOf="@+id/chooseAfternoonWallpaper"
+        app:layout_constraintTop_toTopOf="@+id/chooseAfternoonWallpaper" />
 
     <Button
-        android:id="@+id/nightWallpaperButton"
+        android:id="@+id/chooseNightWallpaper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -56,6 +57,51 @@
         android:text="Night"
         android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/eveningWallpaperButton"
-        app:layout_constraintTop_toTopOf="@+id/eveningWallpaperButton" />
+        app:layout_constraintStart_toEndOf="@+id/chooseEveningWallpaper"
+        app:layout_constraintTop_toTopOf="@+id/chooseEveningWallpaper" />
+
+    <TextView
+        android:id="@+id/morningWallpaperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_horizontal"
+        android:text="Choose\nWallpaper"
+        android:textColor="#F44336"
+        app:layout_constraintEnd_toEndOf="@+id/chooseMorningWallpaper"
+        app:layout_constraintStart_toStartOf="@+id/chooseMorningWallpaper"
+        app:layout_constraintTop_toBottomOf="@+id/chooseMorningWallpaper" />
+
+    <TextView
+        android:id="@+id/afternoonWallpaperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Choose\nWallpaper"
+        android:textColor="#F44336"
+        app:layout_constraintEnd_toEndOf="@+id/chooseAfternoonWallpaper"
+        app:layout_constraintStart_toStartOf="@+id/chooseAfternoonWallpaper"
+        app:layout_constraintTop_toTopOf="@+id/morningWallpaperText" />
+
+    <TextView
+        android:id="@+id/eveningWallpaperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Choose\nWallpaper"
+        android:textColor="#F44336"
+        app:layout_constraintEnd_toEndOf="@+id/chooseEveningWallpaper"
+        app:layout_constraintStart_toStartOf="@+id/chooseEveningWallpaper"
+        app:layout_constraintTop_toTopOf="@+id/afternoonWallpaperText" />
+
+    <TextView
+        android:id="@+id/nightWallpaperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Choose\nWallpaper"
+        android:textColor="#F44336"
+        app:layout_constraintEnd_toEndOf="@+id/chooseNightWallpaper"
+        app:layout_constraintStart_toStartOf="@+id/chooseNightWallpaper"
+        app:layout_constraintTop_toTopOf="@+id/eveningWallpaperText" />
 </androidx.constraintlayout.widget.ConstraintLayout>

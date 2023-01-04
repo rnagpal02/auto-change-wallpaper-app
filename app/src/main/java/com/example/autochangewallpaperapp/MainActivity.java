@@ -31,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
     private Button eveningWallpaperClear;
     private Button nightWallpaperClear;
 
+    private Button morningWallpaperPreview;
+    private Button afternoonWallpaperPreview;
+    private Button eveningWallpaperPreview;
+    private Button nightWallpaperPreview;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +57,20 @@ public class MainActivity extends AppCompatActivity {
         eveningWallpaperClear = findViewById(R.id.eveningWallpaperClear);
         nightWallpaperClear = findViewById(R.id.nightWallpaperClear);
 
+        morningWallpaperPreview = findViewById(R.id.morningWallpaperPreview);
+        afternoonWallpaperPreview = findViewById(R.id.afternoonWallpaperPreview);
+        eveningWallpaperPreview = findViewById(R.id.eveningWallpaperPreview);
+        nightWallpaperPreview = findViewById(R.id.nightWallpaperPreview);
+
         morningWallpaperClear.setOnClickListener(wallpaperClearListener);
         afternoonWallpaperClear.setOnClickListener(wallpaperClearListener);
         eveningWallpaperClear.setOnClickListener(wallpaperClearListener);
         nightWallpaperClear.setOnClickListener(wallpaperClearListener);
+
+        morningWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
+        afternoonWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
+        eveningWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
+        nightWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
 
         updateUI();
     }
@@ -76,6 +91,11 @@ public class MainActivity extends AppCompatActivity {
         afternoonWallpaperClear.setVisibility(afternoonWallpaperChosen ? View.VISIBLE : View.GONE);
         eveningWallpaperClear.setVisibility(eveningWallpaperChosen ? View.VISIBLE : View.GONE);
         nightWallpaperClear.setVisibility(nightWallpaperChosen ? View.VISIBLE : View.GONE);
+
+        morningWallpaperPreview.setClickable(morningWallpaperChosen);
+        afternoonWallpaperPreview.setClickable(afternoonWallpaperChosen);
+        eveningWallpaperPreview.setClickable(eveningWallpaperChosen);
+        nightWallpaperPreview.setClickable(nightWallpaperChosen);
     }
 
     private final View.OnClickListener wallpaperChooseListener = new View.OnClickListener() {
@@ -152,6 +172,36 @@ public class MainActivity extends AppCompatActivity {
             editor.remove(targetWallpaper);
             editor.apply();
             updateUI();
+        }
+    };
+
+    private final View.OnClickListener wallpaperPreviewListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final String TAG = "WALLPAPER_PREVIEW_LISTENER";
+
+            String targetWallpaper;
+            if(v == findViewById(R.id.morningWallpaperPreview)) {
+                targetWallpaper = MORNING_WALLPAPER;
+            } else if(v == findViewById(R.id.afternoonWallpaperPreview)) {
+                targetWallpaper = AFTERNOON_WALLPAPER;
+            } else if(v == findViewById(R.id.eveningWallpaperPreview)) {
+                targetWallpaper = EVENING_WALLPAPER;
+            } else if(v == findViewById(R.id.nightWallpaperPreview)) {
+                targetWallpaper = NIGHT_WALLPAPER;
+            } else {
+                Log.e(TAG, "Unhandled button click");
+                return;
+            }
+
+            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+            String default_str = "default";
+            String uri = preferences.getString(targetWallpaper, default_str);
+            if(!uri.equals(default_str)) {
+                // TODO show preview
+            } else {
+                Toast.makeText(MainActivity.this, "No Wallpaper Found", Toast.LENGTH_SHORT).show();
+            }
         }
     };
 }

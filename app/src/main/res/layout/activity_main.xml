@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:text="Clear"
         android:textSize="10sp"
-        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/nightWallpaperText"
         app:layout_constraintEnd_toEndOf="@+id/nightWallpaperText"
         app:layout_constraintStart_toStartOf="@+id/nightWallpaperText"
@@ -25,7 +24,6 @@
         android:layout_height="wrap_content"
         android:text="Clear"
         android:textSize="10sp"
-        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/eveningWallpaperText"
         app:layout_constraintEnd_toEndOf="@+id/eveningWallpaperText"
         app:layout_constraintStart_toStartOf="@+id/eveningWallpaperText"
@@ -93,6 +91,7 @@
         android:gravity="center_horizontal"
         android:text="Choose\nWallpaper"
         android:textColor="#F44336"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="@+id/morningWallpaperChoose"
         app:layout_constraintStart_toStartOf="@+id/morningWallpaperChoose"
         app:layout_constraintTop_toBottomOf="@+id/morningWallpaperChoose" />
@@ -104,6 +103,7 @@
         android:gravity="center_horizontal"
         android:text="Choose\nWallpaper"
         android:textColor="#F44336"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="@+id/afternoonWallpaperChoose"
         app:layout_constraintStart_toStartOf="@+id/afternoonWallpaperChoose"
         app:layout_constraintTop_toTopOf="@+id/morningWallpaperText" />
@@ -115,6 +115,7 @@
         android:gravity="center_horizontal"
         android:text="Choose\nWallpaper"
         android:textColor="#F44336"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="@+id/eveningWallpaperChoose"
         app:layout_constraintStart_toStartOf="@+id/eveningWallpaperChoose"
         app:layout_constraintTop_toTopOf="@+id/afternoonWallpaperText" />
@@ -126,6 +127,7 @@
         android:gravity="center_horizontal"
         android:text="Choose\nWallpaper"
         android:textColor="#F44336"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="@+id/nightWallpaperChoose"
         app:layout_constraintStart_toStartOf="@+id/nightWallpaperChoose"
         app:layout_constraintTop_toTopOf="@+id/eveningWallpaperText" />
@@ -136,7 +138,6 @@
         android:layout_height="wrap_content"
         android:text="Clear"
         android:textSize="10sp"
-        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/morningWallpaperText"
         app:layout_constraintEnd_toEndOf="@+id/morningWallpaperText"
         app:layout_constraintStart_toStartOf="@+id/morningWallpaperText"
@@ -148,10 +149,50 @@
         android:layout_height="wrap_content"
         android:text="Clear"
         android:textSize="10sp"
-        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/afternoonWallpaperText"
         app:layout_constraintEnd_toEndOf="@+id/afternoonWallpaperText"
         app:layout_constraintStart_toStartOf="@+id/afternoonWallpaperText"
         app:layout_constraintTop_toTopOf="@+id/afternoonWallpaperText" />
+
+    <Button
+        android:id="@+id/morningWallpaperPreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Preview"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/morningWallpaperClear"
+        app:layout_constraintStart_toStartOf="@+id/morningWallpaperClear"
+        app:layout_constraintTop_toBottomOf="@+id/morningWallpaperClear" />
+
+    <Button
+        android:id="@+id/afternoonWallpaperPreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Preview"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/afternoonWallpaperClear"
+        app:layout_constraintStart_toStartOf="@+id/afternoonWallpaperClear"
+        app:layout_constraintTop_toTopOf="@+id/morningWallpaperPreview" />
+
+    <Button
+        android:id="@+id/eveningWallpaperPreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Preview"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/eveningWallpaperClear"
+        app:layout_constraintStart_toStartOf="@+id/eveningWallpaperClear"
+        app:layout_constraintTop_toTopOf="@+id/afternoonWallpaperPreview" />
+
+    <Button
+        android:id="@+id/nightWallpaperPreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Preview"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/nightWallpaperClear"
+        app:layout_constraintStart_toStartOf="@+id/nightWallpaperClear"
+        app:layout_constraintTop_toTopOf="@+id/eveningWallpaperPreview" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

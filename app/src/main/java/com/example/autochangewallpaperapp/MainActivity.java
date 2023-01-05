@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -215,7 +216,9 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // TODO preview wallpaper targetWallpaper
+            Intent intent = new Intent(getApplicationContext(), WallpaperPreview.class);
+            intent.putExtra(WallpaperPreview.WALLPAPER_FILENAME_KEY, targetWallpaper);
+            startActivity(intent);
         }
     };
 }

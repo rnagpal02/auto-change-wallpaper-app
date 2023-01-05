@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.WallpaperManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
@@ -42,6 +44,10 @@ public class MainActivity extends AppCompatActivity {
     private Button eveningWallpaperPreview;
     private Button nightWallpaperPreview;
 
+    private Button morningWallpaperSet;
+    private Button afternoonWallpaperSet;
+    private Button eveningWallpaperSet;
+    private Button nightWallpaperSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
         eveningWallpaperPreview = findViewById(R.id.eveningWallpaperPreview);
         nightWallpaperPreview = findViewById(R.id.nightWallpaperPreview);
 
+        morningWallpaperSet = findViewById(R.id.morningWallpaperSet);
+        afternoonWallpaperSet = findViewById(R.id.afternoonWallpaperSet);
+        eveningWallpaperSet = findViewById(R.id.eveningWallpaperSet);
+        nightWallpaperSet = findViewById(R.id.nightWallpaperSet);
+
         morningWallpaperClear.setOnClickListener(wallpaperClearListener);
         afternoonWallpaperClear.setOnClickListener(wallpaperClearListener);
         eveningWallpaperClear.setOnClickListener(wallpaperClearListener);
@@ -77,6 +88,11 @@ public class MainActivity extends AppCompatActivity {
         afternoonWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
         eveningWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
         nightWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
+
+        morningWallpaperSet.setOnClickListener(wallpaperSetListener);
+        afternoonWallpaperSet.setOnClickListener(wallpaperSetListener);
+        eveningWallpaperSet.setOnClickListener(wallpaperSetListener);
+        nightWallpaperSet.setOnClickListener(wallpaperSetListener);
 
         updateUI();
     }
@@ -102,6 +118,11 @@ public class MainActivity extends AppCompatActivity {
         afternoonWallpaperPreview.setClickable(afternoonWallpaperChosen);
         eveningWallpaperPreview.setClickable(eveningWallpaperChosen);
         nightWallpaperPreview.setClickable(nightWallpaperChosen);
+
+        morningWallpaperSet.setClickable(morningWallpaperChosen);
+        afternoonWallpaperSet.setClickable(afternoonWallpaperChosen);
+        eveningWallpaperSet.setClickable(eveningWallpaperChosen);
+        nightWallpaperSet.setClickable(nightWallpaperChosen);
     }
 
     private boolean isFileExists(String filename) {
@@ -219,6 +240,37 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), WallpaperPreview.class);
             intent.putExtra(WallpaperPreview.WALLPAPER_FILENAME_KEY, targetWallpaper);
             startActivity(intent);
+        }
+    };
+
+    private final View.OnClickListener wallpaperSetListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final String TAG = "WALLPAPER_SET_LISTENER";
+
+            String targetWallpaper;
+            if(v == findViewById(R.id.morningWallpaperSet)) {
+                targetWallpaper = MORNING_WALLPAPER_FILENAME;
+            } else if(v == findViewById(R.id.afternoonWallpaperSet)) {
+                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
+            } else if(v == findViewById(R.id.eveningWallpaperSet)) {
+                targetWallpaper = EVENING_WALLPAPER_FILENAME;
+            } else if(v == findViewById(R.id.nightWallpaperSet)) {
+                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
+            } else {
+                Log.e(TAG, "Unhandled button click");
+                return;
+            }
+
+            try {
+                File file = getFileStreamPath(targetWallpaper);
+                FileInputStream inputStream = new FileInputStream(file);
+                WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
+                wallpaperManager.setStream(inputStream);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(MainActivity.this, "Unable to set wallpaper", Toast.LENGTH_SHORT).show();
+            }
         }
     };
 }

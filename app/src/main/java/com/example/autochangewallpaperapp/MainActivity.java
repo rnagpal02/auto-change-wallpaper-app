@@ -14,12 +14,17 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
 public class MainActivity extends AppCompatActivity {
-    private final String TARGET_WALLPAPER = "target_wallpaper";
-    private final String MORNING_WALLPAPER = "morning_wallpaper";
-    private final String AFTERNOON_WALLPAPER = "afternoon_wallpaper";
-    private final String EVENING_WALLPAPER = "evening_wallpaper";
-    private final String NIGHT_WALLPAPER = "night_wallpaper";
+    private final String TARGET_WALLPAPER_FILENAME = "target_wallpaper";
+    private final String MORNING_WALLPAPER_FILENAME = "morning_wallpaper";
+    private final String AFTERNOON_WALLPAPER_FILENAME = "afternoon_wallpaper";
+    private final String EVENING_WALLPAPER_FILENAME = "evening_wallpaper";
+    private final String NIGHT_WALLPAPER_FILENAME = "night_wallpaper";
 
     private TextView morningWallpaperText;
     private TextView afternoonWallpaperText;
@@ -76,11 +81,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-        boolean morningWallpaperChosen = preferences.contains(MORNING_WALLPAPER);
-        boolean afternoonWallpaperChosen = preferences.contains(AFTERNOON_WALLPAPER);
-        boolean eveningWallpaperChosen = preferences.contains(EVENING_WALLPAPER);
-        boolean nightWallpaperChosen = preferences.contains(NIGHT_WALLPAPER);
+
+        boolean morningWallpaperChosen = isFileExists(MORNING_WALLPAPER_FILENAME);
+        boolean afternoonWallpaperChosen = isFileExists(AFTERNOON_WALLPAPER_FILENAME);
+        boolean eveningWallpaperChosen = isFileExists(EVENING_WALLPAPER_FILENAME);
+        boolean nightWallpaperChosen = isFileExists(NIGHT_WALLPAPER_FILENAME);
 
         morningWallpaperText.setVisibility(morningWallpaperChosen ? View.INVISIBLE : View.VISIBLE);
         afternoonWallpaperText.setVisibility(afternoonWallpaperChosen ? View.INVISIBLE : View.VISIBLE);
@@ -98,19 +103,24 @@ public class MainActivity extends AppCompatActivity {
         nightWallpaperPreview.setClickable(nightWallpaperChosen);
     }
 
+    private boolean isFileExists(String filename) {
+        File file = getFileStreamPath(filename);
+        return file.exists();
+    }
+
     private final View.OnClickListener wallpaperChooseListener = new View.OnClickListener() {
         public void onClick(View v) {
             final String TAG = "WALLPAPER_CHOOSE_LISTENER";
 
             String targetWallpaper;
             if(v == findViewById(R.id.morningWallpaperChoose)) {
-                targetWallpaper = MORNING_WALLPAPER;
+                targetWallpaper = MORNING_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.afternoonWallpaperChoose)) {
-                targetWallpaper = AFTERNOON_WALLPAPER;
+                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.eveningWallpaperChoose)) {
-                targetWallpaper = EVENING_WALLPAPER;
+                targetWallpaper = EVENING_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.nightWallpaperChoose)) {
-                targetWallpaper = NIGHT_WALLPAPER;
+                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
             } else {
                 Log.e(TAG, "Unhandled button click");
                 return;
@@ -118,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(TARGET_WALLPAPER, targetWallpaper);
+            editor.putString(TARGET_WALLPAPER_FILENAME, targetWallpaper);
             editor.apply();
             chooseWallpaper.launch("image/*");
         }
@@ -134,12 +144,24 @@ public class MainActivity extends AppCompatActivity {
                     if(result != null) {
                         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
                         String default_str = "default";
-                        String targetWallpaper = preferences.getString(TARGET_WALLPAPER, default_str);
+                        String targetWallpaper = preferences.getString(TARGET_WALLPAPER_FILENAME, default_str);
                         if (!targetWallpaper.equals(default_str)) {
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putString(targetWallpaper, result.toString());
-                            editor.apply();
-                            updateUI();
+                            try {
+                                InputStream inputStream = (FileInputStream) getApplicationContext().getContentResolver().openInputStream(result);
+                                FileOutputStream outputStream = openFileOutput(targetWallpaper, MODE_PRIVATE);
+
+                                byte[] buffer = new byte[1024*4];
+                                while(inputStream.read(buffer) != -1) {
+                                    outputStream.write(buffer);
+                                }
+
+                                inputStream.close();
+                                outputStream.close();
+                                updateUI();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(MainActivity.this, "Error downloading wallpaper", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             Log.e(TAG, "Target wallpaper not found");
                         }
@@ -156,21 +178,20 @@ public class MainActivity extends AppCompatActivity {
 
             String targetWallpaper;
             if(v == findViewById(R.id.morningWallpaperClear)) {
-                targetWallpaper = MORNING_WALLPAPER;
+                targetWallpaper = MORNING_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.afternoonWallpaperClear)) {
-                targetWallpaper = AFTERNOON_WALLPAPER;
+                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.eveningWallpaperClear)) {
-                targetWallpaper = EVENING_WALLPAPER;
+                targetWallpaper = EVENING_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.nightWallpaperClear)) {
-                targetWallpaper = NIGHT_WALLPAPER;
+                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
             } else {
                 Log.e(TAG, "Unhandled button click");
                 return;
             }
 
-            SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-            editor.remove(targetWallpaper);
-            editor.apply();
+            File file = getFileStreamPath(targetWallpaper);
+            file.delete();
             updateUI();
         }
     };
@@ -182,26 +203,19 @@ public class MainActivity extends AppCompatActivity {
 
             String targetWallpaper;
             if(v == findViewById(R.id.morningWallpaperPreview)) {
-                targetWallpaper = MORNING_WALLPAPER;
+                targetWallpaper = MORNING_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.afternoonWallpaperPreview)) {
-                targetWallpaper = AFTERNOON_WALLPAPER;
+                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.eveningWallpaperPreview)) {
-                targetWallpaper = EVENING_WALLPAPER;
+                targetWallpaper = EVENING_WALLPAPER_FILENAME;
             } else if(v == findViewById(R.id.nightWallpaperPreview)) {
-                targetWallpaper = NIGHT_WALLPAPER;
+                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
             } else {
                 Log.e(TAG, "Unhandled button click");
                 return;
             }
 
-            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-            String default_str = "default";
-            String uri = preferences.getString(targetWallpaper, default_str);
-            if(!uri.equals(default_str)) {
-                // TODO show preview
-            } else {
-                Toast.makeText(MainActivity.this, "No Wallpaper Found", Toast.LENGTH_SHORT).show();
-            }
+            // TODO preview wallpaper targetWallpaper
         }
     };
 }

@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.TimePickerDialog;
 import android.app.WallpaperManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,20 +15,40 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
+    private final String FIRST_RUN_KEY = "first_run";
+
     private final String TARGET_WALLPAPER_FILENAME = "target_wallpaper";
     private final String MORNING_WALLPAPER_FILENAME = "morning_wallpaper";
     private final String AFTERNOON_WALLPAPER_FILENAME = "afternoon_wallpaper";
     private final String EVENING_WALLPAPER_FILENAME = "evening_wallpaper";
     private final String NIGHT_WALLPAPER_FILENAME = "night_wallpaper";
+
+    private final String MORNING_TIME_HOUR_KEY = "morning_hour";
+    private final String MORNING_TIME_MINUTE_KEY = "morning_min";
+    private final String AFTERNOON_TIME_HOUR_KEY = "afternoon_hour";
+    private final String AFTERNOON_TIME_MINUTE_KEY = "afternoon_min";
+    private final String EVENING_TIME_HOUR_KEY = "evening_hour";
+    private final String EVENING_TIME_MINUTE_KEY = "evening_min";
+    private final String NIGHT_TIME_HOUR_KEY = "night_hour";
+    private final String NIGHT_TIME_MINUTE_KEY = "night_min";
+
+    private final int MORNING_TIME_HOUR_DEFAULT = 7;
+    private final int MORNING_TIME_MINUTE_DEFAULT = 0;
+    private final int AFTERNOON_TIME_HOUR_DEFAULT = 12;
+    private final int AFTERNOON_TIME_MINUTE_DEFAULT = 0;
+    private final int EVENING_TIME_HOUR_DEFAULT = 16;
+    private final int EVENING_TIME_MINUTE_DEFAULT = 0;
+    private final int NIGHT_TIME_HOUR_DEFAULT = 19;
+    private final int NIGHT_TIME_MINUTE_DEFAULT = 0;
 
     private TextView morningWallpaperText;
     private TextView afternoonWallpaperText;
@@ -48,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
     private Button afternoonWallpaperSet;
     private Button eveningWallpaperSet;
     private Button nightWallpaperSet;
+
+    private Button morningWallpaperTime;
+    private Button afternoonWallpaperTime;
+    private Button eveningWallpaperTime;
+    private Button nightWallpaperTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
         eveningWallpaperSet = findViewById(R.id.eveningWallpaperSet);
         nightWallpaperSet = findViewById(R.id.nightWallpaperSet);
 
+        morningWallpaperTime = findViewById(R.id.morningWallpaperTime);
+        afternoonWallpaperTime = findViewById(R.id.afternoonWallpaperTime);
+        eveningWallpaperTime = findViewById(R.id.eveningWallpaperTime);
+        nightWallpaperTime = findViewById(R.id.nightWallpaperTime);
+
         morningWallpaperClear.setOnClickListener(wallpaperClearListener);
         afternoonWallpaperClear.setOnClickListener(wallpaperClearListener);
         eveningWallpaperClear.setOnClickListener(wallpaperClearListener);
@@ -94,7 +125,37 @@ public class MainActivity extends AppCompatActivity {
         eveningWallpaperSet.setOnClickListener(wallpaperSetListener);
         nightWallpaperSet.setOnClickListener(wallpaperSetListener);
 
+        morningWallpaperTime.setOnClickListener(wallpaperTimeListener);
+        afternoonWallpaperTime.setOnClickListener(wallpaperTimeListener);
+        eveningWallpaperTime.setOnClickListener(wallpaperTimeListener);
+        nightWallpaperTime.setOnClickListener(wallpaperTimeListener);
+
+        checkFirstRun();
         updateUI();
+    }
+
+    private void checkFirstRun() {
+        final String TAG = "CHECK_FIRST_RUN";
+
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        boolean is_first_run = preferences.getBoolean(FIRST_RUN_KEY, true);
+        if(is_first_run) {
+            Log.d(TAG, "First run");
+            SharedPreferences.Editor editor = preferences.edit();
+
+            editor.putInt(MORNING_TIME_HOUR_KEY, MORNING_TIME_HOUR_DEFAULT);
+            editor.putInt(MORNING_TIME_MINUTE_KEY, MORNING_TIME_MINUTE_DEFAULT);
+            editor.putInt(AFTERNOON_TIME_HOUR_KEY, AFTERNOON_TIME_HOUR_DEFAULT);
+            editor.putInt(AFTERNOON_TIME_MINUTE_KEY, AFTERNOON_TIME_MINUTE_DEFAULT);
+            editor.putInt(EVENING_TIME_HOUR_KEY, EVENING_TIME_HOUR_DEFAULT);
+            editor.putInt(EVENING_TIME_MINUTE_KEY, EVENING_TIME_MINUTE_DEFAULT);
+            editor.putInt(NIGHT_TIME_HOUR_KEY, NIGHT_TIME_HOUR_DEFAULT);
+            editor.putInt(NIGHT_TIME_MINUTE_KEY, NIGHT_TIME_MINUTE_DEFAULT);
+
+            editor.putBoolean(FIRST_RUN_KEY, false);
+            editor.apply();
+            Log.d(TAG, "Set default wallpaper times");
+        }
     }
 
     private void updateUI() {
@@ -271,6 +332,55 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Toast.makeText(MainActivity.this, "Unable to set wallpaper", Toast.LENGTH_SHORT).show();
             }
+        }
+    };
+
+    private final View.OnClickListener wallpaperTimeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            final String TAG = "WALLPAPER_TIME_LISTENER";
+
+            String hour_key;
+            String min_key;
+
+            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+
+            if(view == findViewById(R.id.morningWallpaperTime)) {
+                hour_key = MORNING_TIME_HOUR_KEY;
+                min_key = MORNING_TIME_MINUTE_KEY;
+            } else if(view == findViewById(R.id.afternoonWallpaperTime)) {
+                hour_key = AFTERNOON_TIME_HOUR_KEY;
+                min_key = AFTERNOON_TIME_MINUTE_KEY;
+            } else if(view == findViewById(R.id.eveningWallpaperTime)) {
+                hour_key = EVENING_TIME_HOUR_KEY;
+                min_key = EVENING_TIME_MINUTE_KEY;
+            } else if(view == findViewById(R.id.nightWallpaperTime)) {
+                hour_key = NIGHT_TIME_HOUR_KEY;
+                min_key = NIGHT_TIME_MINUTE_KEY;
+            } else {
+                Log.e(TAG, "Unhandled button click");
+                return;
+            }
+
+            int default_val = -1;
+            int current_hour = preferences.getInt(hour_key, default_val);
+            int current_min = preferences.getInt(min_key, default_val);
+
+            if(current_hour < 0 || current_min < 0) {
+                Log.e(TAG, "Error getting currently set times");
+                return;
+            }
+
+            TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                @Override
+                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt(hour_key, hour);
+                    editor.putInt(min_key, minute);
+                    editor.apply();
+                }
+            }, current_hour, current_min, false);
+            timePickerDialog.show();
         }
     };
 }

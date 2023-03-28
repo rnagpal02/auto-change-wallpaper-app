@@ -236,4 +236,45 @@
         app:layout_constraintStart_toStartOf="@+id/nightWallpaperClear"
         app:layout_constraintTop_toTopOf="@+id/eveningWallpaperPreview" />
 
+    <Button
+        android:id="@+id/morningWallpaperTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Time"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/morningWallpaperSet"
+        app:layout_constraintStart_toStartOf="@+id/morningWallpaperSet"
+        app:layout_constraintTop_toBottomOf="@+id/morningWallpaperSet" />
+
+    <Button
+        android:id="@+id/afternoonWallpaperTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/afternoonWallpaperSet"
+        app:layout_constraintStart_toStartOf="@+id/afternoonWallpaperSet"
+        app:layout_constraintTop_toTopOf="@+id/morningWallpaperTime" />
+
+    <Button
+        android:id="@+id/eveningWallpaperTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/eveningWallpaperSet"
+        app:layout_constraintStart_toStartOf="@+id/eveningWallpaperSet"
+        app:layout_constraintTop_toTopOf="@+id/afternoonWallpaperTime" />
+
+    <Button
+        android:id="@+id/nightWallpaperTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/nightWallpaperSet"
+        app:layout_constraintStart_toStartOf="@+id/nightWallpaperSet"
+        app:layout_constraintTop_toTopOf="@+id/eveningWallpaperTime" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

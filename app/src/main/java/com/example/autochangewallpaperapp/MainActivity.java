@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private final String EVENING_TIME_MINUTE_KEY = "evening_min";
     private final String NIGHT_TIME_HOUR_KEY = "night_hour";
     private final String NIGHT_TIME_MINUTE_KEY = "night_min";
+
+    private final String AUTO_CHANGE_KEY = "auto_change";
 
     private final int MORNING_TIME_HOUR_DEFAULT = 7;
     private final int MORNING_TIME_MINUTE_DEFAULT = 0;
@@ -74,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
     private Button afternoonWallpaperTime;
     private Button eveningWallpaperTime;
     private Button nightWallpaperTime;
+
+    private Switch autoChangeWallpaper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
         eveningWallpaperTime = findViewById(R.id.eveningWallpaperTime);
         nightWallpaperTime = findViewById(R.id.nightWallpaperTime);
 
+        autoChangeWallpaper = findViewById(R.id.autoChangeSwitch);
+
         morningWallpaperClear.setOnClickListener(wallpaperClearListener);
         afternoonWallpaperClear.setOnClickListener(wallpaperClearListener);
         eveningWallpaperClear.setOnClickListener(wallpaperClearListener);
@@ -129,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
         afternoonWallpaperTime.setOnClickListener(wallpaperTimeListener);
         eveningWallpaperTime.setOnClickListener(wallpaperTimeListener);
         nightWallpaperTime.setOnClickListener(wallpaperTimeListener);
+
+        autoChangeWallpaper.setOnCheckedChangeListener(autoChangeListener);
 
         checkFirstRun();
         updateUI();
@@ -152,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
             editor.putInt(NIGHT_TIME_HOUR_KEY, NIGHT_TIME_HOUR_DEFAULT);
             editor.putInt(NIGHT_TIME_MINUTE_KEY, NIGHT_TIME_MINUTE_DEFAULT);
 
+            editor.putBoolean(AUTO_CHANGE_KEY, false);
+
             editor.putBoolean(FIRST_RUN_KEY, false);
             editor.apply();
             Log.d(TAG, "Set default wallpaper times");
@@ -159,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-
         boolean morningWallpaperChosen = isFileExists(MORNING_WALLPAPER_FILENAME);
         boolean afternoonWallpaperChosen = isFileExists(AFTERNOON_WALLPAPER_FILENAME);
         boolean eveningWallpaperChosen = isFileExists(EVENING_WALLPAPER_FILENAME);
@@ -184,6 +195,9 @@ public class MainActivity extends AppCompatActivity {
         afternoonWallpaperSet.setClickable(afternoonWallpaperChosen);
         eveningWallpaperSet.setClickable(eveningWallpaperChosen);
         nightWallpaperSet.setClickable(nightWallpaperChosen);
+
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        autoChangeWallpaper.setChecked(preferences.getBoolean(AUTO_CHANGE_KEY, false));
     }
 
     private boolean isFileExists(String filename) {
@@ -381,6 +395,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, current_hour, current_min, false);
             timePickerDialog.show();
+        }
+    };
+
+    private final CompoundButton.OnCheckedChangeListener autoChangeListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(AUTO_CHANGE_KEY, b);
+            editor.apply();
         }
     };
 }

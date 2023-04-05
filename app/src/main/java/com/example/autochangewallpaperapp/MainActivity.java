@@ -5,6 +5,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.app.WallpaperManager;
 import android.content.Intent;
@@ -24,6 +26,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     private final String FIRST_RUN_KEY = "first_run";
@@ -400,10 +405,94 @@ public class MainActivity extends AppCompatActivity {
 
     private final CompoundButton.OnCheckedChangeListener autoChangeListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
-        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+            if(isChecked) {
+                boolean morningWallpaperChosen = isFileExists(MORNING_WALLPAPER_FILENAME);
+                boolean afternoonWallpaperChosen = isFileExists(AFTERNOON_WALLPAPER_FILENAME);
+                boolean eveningWallpaperChosen = isFileExists(EVENING_WALLPAPER_FILENAME);
+                boolean nightWallpaperChosen = isFileExists(NIGHT_WALLPAPER_FILENAME);
+
+                if(!morningWallpaperChosen || !afternoonWallpaperChosen || !eveningWallpaperChosen || !nightWallpaperChosen) {
+                    Toast.makeText(getApplicationContext(), "Finish choosing all wallpapers", Toast.LENGTH_SHORT).show();
+                    compoundButton.setChecked(false);
+                    return;
+                }
+
+                int default_val = -1;
+                SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+                int morningHour = preferences.getInt(MORNING_TIME_HOUR_KEY, default_val);
+                int morningMin = preferences.getInt(MORNING_TIME_MINUTE_KEY, default_val);
+                int afternoonHour = preferences.getInt(AFTERNOON_TIME_HOUR_KEY, default_val);
+                int afternoonMin = preferences.getInt(AFTERNOON_TIME_MINUTE_KEY, default_val);
+                int eveningHour = preferences.getInt(EVENING_TIME_HOUR_KEY, default_val);
+                int eveningMin = preferences.getInt(EVENING_TIME_MINUTE_KEY, default_val);
+                int nightHour = preferences.getInt(NIGHT_TIME_HOUR_KEY, default_val);
+                int nightMin = preferences.getInt(NIGHT_TIME_MINUTE_KEY, default_val);
+
+                Calendar currentDate = Calendar.getInstance();
+                Calendar morningDate = Calendar.getInstance();
+                morningDate.set(Calendar.SECOND, 0);
+                morningDate.set(Calendar.MILLISECOND, 0);
+                Calendar afternoonDate = morningDate;
+                Calendar eveningDate = morningDate;
+                Calendar nightDate = morningDate;
+
+                morningDate.set(Calendar.HOUR, morningHour);
+                morningDate.set(Calendar.MINUTE, morningMin);
+                afternoonDate.set(Calendar.HOUR, afternoonHour);
+                afternoonDate.set(Calendar.MINUTE, afternoonMin);
+                eveningDate.set(Calendar.HOUR, eveningHour);
+                eveningDate.set(Calendar.MINUTE, eveningMin);
+                nightDate.set(Calendar.HOUR, nightHour);
+                nightDate.set(Calendar.MINUTE, nightMin);
+
+                if(currentDate.after(morningDate)) {
+                    morningDate.add(Calendar.DATE, 1);
+                }
+                if(currentDate.after(afternoonDate)) {
+                    afternoonDate.add(Calendar.DATE, 1);
+                }
+                if(currentDate.after(eveningDate)) {
+                    eveningDate.add(Calendar.DATE, 1);
+                }
+                if(currentDate.after(nightDate)) {
+                    nightDate.add(Calendar.DATE, 1);
+                }
+
+                long morningTime = morningDate.getTimeInMillis();
+                long afternoonTime = afternoonDate.getTimeInMillis();
+                long eveningTime = eveningDate.getTimeInMillis();
+                long nightTime = nightDate.getTimeInMillis();
+
+                long alarmTime = Math.min(Math.min(morningTime, afternoonTime), Math.min(eveningTime, nightTime));
+                String alarmWallpaper;
+                if(alarmTime == morningTime) {
+                    alarmWallpaper = MORNING_WALLPAPER_FILENAME;
+                } else if(alarmTime == afternoonTime) {
+                    alarmWallpaper = AFTERNOON_WALLPAPER_FILENAME;
+                } else if(alarmTime == eveningTime) {
+                    alarmWallpaper = EVENING_WALLPAPER_FILENAME;
+                } else {
+                    alarmWallpaper = NIGHT_WALLPAPER_FILENAME;
+                }
+
+                Intent intent = new Intent(MainActivity.this, WallpaperBroadcastReceiver.class);
+                intent.putExtra(WallpaperBroadcastReceiver.WALLPAPER_FILENAME_KEY, alarmWallpaper);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_MUTABLE);
+
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                alarmManager.set(AlarmManager.RTC, 0, pendingIntent);
+            } else {
+                Intent intent = new Intent(getApplicationContext(), WallpaperBroadcastReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_MUTABLE);
+
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                alarmManager.cancel(pendingIntent);
+            }
+
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean(AUTO_CHANGE_KEY, b);
+            editor.putBoolean(AUTO_CHANGE_KEY, isChecked);
             editor.apply();
         }
     };

@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.app.WallpaperManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -22,68 +21,17 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-    private final String FIRST_RUN_KEY = "first_run";
+    private final String PREFERENCES_FIRST_RUN_KEY = "first_run";
+    private final String PREFERENCES_TARGET_WALLPAPER_KEY = "target_wallpaper";
+    private final String PREFERENCES_AUTO_CHANGE_KEY = "auto_change";
 
-    private final String TARGET_WALLPAPER_FILENAME = "target_wallpaper";
-    private final String MORNING_WALLPAPER_FILENAME = "morning_wallpaper";
-    private final String AFTERNOON_WALLPAPER_FILENAME = "afternoon_wallpaper";
-    private final String EVENING_WALLPAPER_FILENAME = "evening_wallpaper";
-    private final String NIGHT_WALLPAPER_FILENAME = "night_wallpaper";
+    private final int NUM_WALLPAPERS = 4;
 
-    private final String MORNING_TIME_HOUR_KEY = "morning_hour";
-    private final String MORNING_TIME_MINUTE_KEY = "morning_min";
-    private final String AFTERNOON_TIME_HOUR_KEY = "afternoon_hour";
-    private final String AFTERNOON_TIME_MINUTE_KEY = "afternoon_min";
-    private final String EVENING_TIME_HOUR_KEY = "evening_hour";
-    private final String EVENING_TIME_MINUTE_KEY = "evening_min";
-    private final String NIGHT_TIME_HOUR_KEY = "night_hour";
-    private final String NIGHT_TIME_MINUTE_KEY = "night_min";
-
-    private final String AUTO_CHANGE_KEY = "auto_change";
-
-    private final int MORNING_TIME_HOUR_DEFAULT = 7;
-    private final int MORNING_TIME_MINUTE_DEFAULT = 0;
-    private final int AFTERNOON_TIME_HOUR_DEFAULT = 12;
-    private final int AFTERNOON_TIME_MINUTE_DEFAULT = 0;
-    private final int EVENING_TIME_HOUR_DEFAULT = 16;
-    private final int EVENING_TIME_MINUTE_DEFAULT = 0;
-    private final int NIGHT_TIME_HOUR_DEFAULT = 19;
-    private final int NIGHT_TIME_MINUTE_DEFAULT = 0;
-
-    private TextView morningWallpaperText;
-    private TextView afternoonWallpaperText;
-    private TextView eveningWallpaperText;
-    private TextView nightWallpaperText;
-
-    private Button morningWallpaperClear;
-    private Button afternoonWallpaperClear;
-    private Button eveningWallpaperClear;
-    private Button nightWallpaperClear;
-
-    private Button morningWallpaperPreview;
-    private Button afternoonWallpaperPreview;
-    private Button eveningWallpaperPreview;
-    private Button nightWallpaperPreview;
-
-    private Button morningWallpaperSet;
-    private Button afternoonWallpaperSet;
-    private Button eveningWallpaperSet;
-    private Button nightWallpaperSet;
-
-    private Button morningWallpaperTime;
-    private Button afternoonWallpaperTime;
-    private Button eveningWallpaperTime;
-    private Button nightWallpaperTime;
-
+    com.example.autochangewallpaperapp.WallpaperManager wallpaperManager; // TODO change class name
+    WallpaperUI[] wallpaperUIs;
     private Switch autoChangeWallpaper;
 
     @Override
@@ -91,58 +39,47 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.morningWallpaperChoose).setOnClickListener(wallpaperChooseListener);
-        findViewById(R.id.afternoonWallpaperChoose).setOnClickListener(wallpaperChooseListener);
-        findViewById(R.id.eveningWallpaperChoose).setOnClickListener(wallpaperChooseListener);
-        findViewById(R.id.nightWallpaperChoose).setOnClickListener(wallpaperChooseListener);
+        wallpaperManager = com.example.autochangewallpaperapp.WallpaperManager.getWallpaperManager();
+        wallpaperUIs = new WallpaperUI[NUM_WALLPAPERS];
+        for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+            wallpaperUIs[i] = new WallpaperUI();
+        }
 
-        morningWallpaperText = findViewById(R.id.morningWallpaperText);
-        afternoonWallpaperText = findViewById(R.id.afternoonWallpaperText);
-        eveningWallpaperText = findViewById(R.id.eveningWallpaperText);
-        nightWallpaperText = findViewById(R.id.nightWallpaperText);
+        wallpaperUIs[0].chooseWallpaperText = findViewById(R.id.morningWallpaperText);
+        wallpaperUIs[1].chooseWallpaperText = findViewById(R.id.afternoonWallpaperText);
+        wallpaperUIs[2].chooseWallpaperText = findViewById(R.id.eveningWallpaperText);
+        wallpaperUIs[3].chooseWallpaperText = findViewById(R.id.nightWallpaperText);
 
-        morningWallpaperClear = findViewById(R.id.morningWallpaperClear);
-        afternoonWallpaperClear = findViewById(R.id.afternoonWallpaperClear);
-        eveningWallpaperClear = findViewById(R.id.eveningWallpaperClear);
-        nightWallpaperClear = findViewById(R.id.nightWallpaperClear);
+        wallpaperUIs[0].chooseWallpaperButton = findViewById(R.id.morningWallpaperChoose);
+        wallpaperUIs[1].chooseWallpaperButton = findViewById(R.id.afternoonWallpaperChoose);
+        wallpaperUIs[2].chooseWallpaperButton = findViewById(R.id.eveningWallpaperChoose);
+        wallpaperUIs[3].chooseWallpaperButton = findViewById(R.id.nightWallpaperChoose);
 
-        morningWallpaperPreview = findViewById(R.id.morningWallpaperPreview);
-        afternoonWallpaperPreview = findViewById(R.id.afternoonWallpaperPreview);
-        eveningWallpaperPreview = findViewById(R.id.eveningWallpaperPreview);
-        nightWallpaperPreview = findViewById(R.id.nightWallpaperPreview);
+        wallpaperUIs[0].clearWallpaperButton = findViewById(R.id.morningWallpaperClear);
+        wallpaperUIs[1].clearWallpaperButton = findViewById(R.id.afternoonWallpaperClear);
+        wallpaperUIs[2].clearWallpaperButton = findViewById(R.id.eveningWallpaperClear);
+        wallpaperUIs[3].clearWallpaperButton = findViewById(R.id.nightWallpaperClear);
 
-        morningWallpaperSet = findViewById(R.id.morningWallpaperSet);
-        afternoonWallpaperSet = findViewById(R.id.afternoonWallpaperSet);
-        eveningWallpaperSet = findViewById(R.id.eveningWallpaperSet);
-        nightWallpaperSet = findViewById(R.id.nightWallpaperSet);
+        wallpaperUIs[0].previewWallpaperButton = findViewById(R.id.morningWallpaperPreview);
+        wallpaperUIs[1].previewWallpaperButton = findViewById(R.id.afternoonWallpaperPreview);
+        wallpaperUIs[2].previewWallpaperButton = findViewById(R.id.eveningWallpaperPreview);
+        wallpaperUIs[3].previewWallpaperButton = findViewById(R.id.nightWallpaperPreview);
 
-        morningWallpaperTime = findViewById(R.id.morningWallpaperTime);
-        afternoonWallpaperTime = findViewById(R.id.afternoonWallpaperTime);
-        eveningWallpaperTime = findViewById(R.id.eveningWallpaperTime);
-        nightWallpaperTime = findViewById(R.id.nightWallpaperTime);
+        wallpaperUIs[0].setWallpaperButton = findViewById(R.id.morningWallpaperSet);
+        wallpaperUIs[1].setWallpaperButton = findViewById(R.id.afternoonWallpaperSet);
+        wallpaperUIs[2].setWallpaperButton = findViewById(R.id.eveningWallpaperSet);
+        wallpaperUIs[3].setWallpaperButton = findViewById(R.id.nightWallpaperSet);
+
+        wallpaperUIs[0].setTimeButton = findViewById(R.id.morningWallpaperTime);
+        wallpaperUIs[1].setTimeButton = findViewById(R.id.afternoonWallpaperTime);
+        wallpaperUIs[2].setTimeButton = findViewById(R.id.eveningWallpaperTime);
+        wallpaperUIs[3].setTimeButton = findViewById(R.id.nightWallpaperTime);
 
         autoChangeWallpaper = findViewById(R.id.autoChangeSwitch);
 
-        morningWallpaperClear.setOnClickListener(wallpaperClearListener);
-        afternoonWallpaperClear.setOnClickListener(wallpaperClearListener);
-        eveningWallpaperClear.setOnClickListener(wallpaperClearListener);
-        nightWallpaperClear.setOnClickListener(wallpaperClearListener);
-
-        morningWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
-        afternoonWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
-        eveningWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
-        nightWallpaperPreview.setOnClickListener(wallpaperPreviewListener);
-
-        morningWallpaperSet.setOnClickListener(wallpaperSetListener);
-        afternoonWallpaperSet.setOnClickListener(wallpaperSetListener);
-        eveningWallpaperSet.setOnClickListener(wallpaperSetListener);
-        nightWallpaperSet.setOnClickListener(wallpaperSetListener);
-
-        morningWallpaperTime.setOnClickListener(wallpaperTimeListener);
-        afternoonWallpaperTime.setOnClickListener(wallpaperTimeListener);
-        eveningWallpaperTime.setOnClickListener(wallpaperTimeListener);
-        nightWallpaperTime.setOnClickListener(wallpaperTimeListener);
-
+        for(WallpaperUI ui : wallpaperUIs) {
+            ui.setListeners();
+        }
         autoChangeWallpaper.setOnCheckedChangeListener(autoChangeListener);
 
         checkFirstRun();
@@ -153,85 +90,55 @@ public class MainActivity extends AppCompatActivity {
         final String TAG = "CHECK_FIRST_RUN";
 
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-        boolean is_first_run = preferences.getBoolean(FIRST_RUN_KEY, true);
+        boolean is_first_run = preferences.getBoolean(PREFERENCES_FIRST_RUN_KEY, true);
         if(is_first_run) {
             Log.d(TAG, "First run");
+
+            wallpaperManager.createDefaults(MainActivity.this, WallpaperDefaultTimes.DEFAULT_MORNING_AFTERNOON_EVENING_NIGHT_TIMES);
+
             SharedPreferences.Editor editor = preferences.edit();
-
-            editor.putInt(MORNING_TIME_HOUR_KEY, MORNING_TIME_HOUR_DEFAULT);
-            editor.putInt(MORNING_TIME_MINUTE_KEY, MORNING_TIME_MINUTE_DEFAULT);
-            editor.putInt(AFTERNOON_TIME_HOUR_KEY, AFTERNOON_TIME_HOUR_DEFAULT);
-            editor.putInt(AFTERNOON_TIME_MINUTE_KEY, AFTERNOON_TIME_MINUTE_DEFAULT);
-            editor.putInt(EVENING_TIME_HOUR_KEY, EVENING_TIME_HOUR_DEFAULT);
-            editor.putInt(EVENING_TIME_MINUTE_KEY, EVENING_TIME_MINUTE_DEFAULT);
-            editor.putInt(NIGHT_TIME_HOUR_KEY, NIGHT_TIME_HOUR_DEFAULT);
-            editor.putInt(NIGHT_TIME_MINUTE_KEY, NIGHT_TIME_MINUTE_DEFAULT);
-
-            editor.putBoolean(AUTO_CHANGE_KEY, false);
-
-            editor.putBoolean(FIRST_RUN_KEY, false);
+            editor.putBoolean(PREFERENCES_AUTO_CHANGE_KEY, false);
+            editor.putBoolean(PREFERENCES_FIRST_RUN_KEY, false);
             editor.apply();
             Log.d(TAG, "Set default wallpaper times");
+        } else {
+            wallpaperManager.initWallpapers(MainActivity.this);
         }
     }
 
     private void updateUI() {
-        boolean morningWallpaperChosen = isFileExists(MORNING_WALLPAPER_FILENAME);
-        boolean afternoonWallpaperChosen = isFileExists(AFTERNOON_WALLPAPER_FILENAME);
-        boolean eveningWallpaperChosen = isFileExists(EVENING_WALLPAPER_FILENAME);
-        boolean nightWallpaperChosen = isFileExists(NIGHT_WALLPAPER_FILENAME);
-
-        morningWallpaperText.setVisibility(morningWallpaperChosen ? View.INVISIBLE : View.VISIBLE);
-        afternoonWallpaperText.setVisibility(afternoonWallpaperChosen ? View.INVISIBLE : View.VISIBLE);
-        eveningWallpaperText.setVisibility(eveningWallpaperChosen ? View.INVISIBLE : View.VISIBLE);
-        nightWallpaperText.setVisibility(nightWallpaperChosen ? View.INVISIBLE : View.VISIBLE);
-
-        morningWallpaperClear.setVisibility(morningWallpaperChosen ? View.VISIBLE : View.GONE);
-        afternoonWallpaperClear.setVisibility(afternoonWallpaperChosen ? View.VISIBLE : View.GONE);
-        eveningWallpaperClear.setVisibility(eveningWallpaperChosen ? View.VISIBLE : View.GONE);
-        nightWallpaperClear.setVisibility(nightWallpaperChosen ? View.VISIBLE : View.GONE);
-
-        morningWallpaperPreview.setClickable(morningWallpaperChosen);
-        afternoonWallpaperPreview.setClickable(afternoonWallpaperChosen);
-        eveningWallpaperPreview.setClickable(eveningWallpaperChosen);
-        nightWallpaperPreview.setClickable(nightWallpaperChosen);
-
-        morningWallpaperSet.setClickable(morningWallpaperChosen);
-        afternoonWallpaperSet.setClickable(afternoonWallpaperChosen);
-        eveningWallpaperSet.setClickable(eveningWallpaperChosen);
-        nightWallpaperSet.setClickable(nightWallpaperChosen);
+        for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+            boolean wallpaperChosen = wallpaperManager.isWallpaperChosen(MainActivity.this, i);
+            wallpaperUIs[i].setVisibilities(wallpaperChosen);
+            wallpaperUIs[i].setClickabilities(wallpaperChosen);
+        }
 
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-        autoChangeWallpaper.setChecked(preferences.getBoolean(AUTO_CHANGE_KEY, false));
+        boolean default_value = false;
+        autoChangeWallpaper.setChecked(preferences.getBoolean(PREFERENCES_AUTO_CHANGE_KEY, default_value));
     }
 
-    private boolean isFileExists(String filename) {
-        File file = getFileStreamPath(filename);
-        return file.exists();
-    }
-
-    private final View.OnClickListener wallpaperChooseListener = new View.OnClickListener() {
+    private final View.OnClickListener chooseWallpaperListener = new View.OnClickListener() {
         public void onClick(View v) {
             final String TAG = "WALLPAPER_CHOOSE_LISTENER";
 
-            String targetWallpaper;
-            if(v == findViewById(R.id.morningWallpaperChoose)) {
-                targetWallpaper = MORNING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.afternoonWallpaperChoose)) {
-                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.eveningWallpaperChoose)) {
-                targetWallpaper = EVENING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.nightWallpaperChoose)) {
-                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
-            } else {
+            int targetWallpaper = -1;
+            for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+                if(v == wallpaperUIs[i].chooseWallpaperButton) {
+                    targetWallpaper = i;
+                    break;
+                }
+            }
+            if(targetWallpaper < 0) {
                 Log.e(TAG, "Unhandled button click");
                 return;
             }
 
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(TARGET_WALLPAPER_FILENAME, targetWallpaper);
+            editor.putInt(PREFERENCES_TARGET_WALLPAPER_KEY, targetWallpaper);
             editor.apply();
+
             chooseWallpaper.launch("image/*");
         }
     };
@@ -243,162 +150,121 @@ public class MainActivity extends AppCompatActivity {
                 public void onActivityResult(Uri result) {
                     final String TAG = "CHOOSE_WALLPAPER_ACTIVITY_RESULT";
 
-                    if(result != null) {
-                        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-                        String default_str = "default";
-                        String targetWallpaper = preferences.getString(TARGET_WALLPAPER_FILENAME, default_str);
-                        if (!targetWallpaper.equals(default_str)) {
-                            try {
-                                InputStream inputStream = (FileInputStream) getApplicationContext().getContentResolver().openInputStream(result);
-                                FileOutputStream outputStream = openFileOutput(targetWallpaper, MODE_PRIVATE);
-
-                                byte[] buffer = new byte[1024*4];
-                                while(inputStream.read(buffer) != -1) {
-                                    outputStream.write(buffer);
-                                }
-
-                                inputStream.close();
-                                outputStream.close();
-                                updateUI();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                Toast.makeText(MainActivity.this, "Error downloading wallpaper", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Log.e(TAG, "Target wallpaper not found");
-                        }
-                    } else {
-                        Toast.makeText(MainActivity.this, "No Wallpaper Chosen", Toast.LENGTH_SHORT).show();
+                    int targetWallpaper;
+                    int default_value = -1;
+                    SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+                    targetWallpaper = preferences.getInt(PREFERENCES_TARGET_WALLPAPER_KEY, default_value);
+                    if(targetWallpaper == default_value) {
+                        Log.e(TAG, "Target wallpaper not found");
+                        return;
                     }
+
+                    boolean isOk = wallpaperManager.downloadWallpaper(MainActivity.this, targetWallpaper, result);
+                    if(!isOk) {
+                        Toast.makeText(MainActivity.this, "Error downloading wallpaper", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    updateUI();
                 }
             });
 
-    private final View.OnClickListener wallpaperClearListener = new View.OnClickListener() {
+    private final View.OnClickListener clearWallpaperListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             final String TAG = "WALLPAPER_CLEAR_LISTENER";
 
-            String targetWallpaper;
-            if(v == findViewById(R.id.morningWallpaperClear)) {
-                targetWallpaper = MORNING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.afternoonWallpaperClear)) {
-                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.eveningWallpaperClear)) {
-                targetWallpaper = EVENING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.nightWallpaperClear)) {
-                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
-            } else {
+            int targetWallpaper = -1;
+            for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+                if(v == wallpaperUIs[i].clearWallpaperButton) {
+                    targetWallpaper = i;
+                    break;
+                }
+            }
+            if(targetWallpaper < 0) {
                 Log.e(TAG, "Unhandled button click");
                 return;
             }
 
-            File file = getFileStreamPath(targetWallpaper);
-            file.delete();
+            wallpaperManager.clearWallpaper(MainActivity.this, targetWallpaper);
             updateUI();
         }
     };
 
-    private final View.OnClickListener wallpaperPreviewListener = new View.OnClickListener() {
+    private final View.OnClickListener previewWallpaperListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             final String TAG = "WALLPAPER_PREVIEW_LISTENER";
 
-            String targetWallpaper;
-            if(v == findViewById(R.id.morningWallpaperPreview)) {
-                targetWallpaper = MORNING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.afternoonWallpaperPreview)) {
-                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.eveningWallpaperPreview)) {
-                targetWallpaper = EVENING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.nightWallpaperPreview)) {
-                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
-            } else {
+            int targetWallpaper = -1;
+            for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+                if(v == wallpaperUIs[i].previewWallpaperButton) {
+                    targetWallpaper = i;
+                    break;
+                }
+            }
+            if(targetWallpaper < 0) {
                 Log.e(TAG, "Unhandled button click");
                 return;
             }
 
+            String filename = wallpaperManager.getFilename(targetWallpaper);
             Intent intent = new Intent(getApplicationContext(), WallpaperPreview.class);
-            intent.putExtra(WallpaperPreview.WALLPAPER_FILENAME_KEY, targetWallpaper);
+            intent.putExtra(WallpaperPreview.EXTRA_WALLPAPER_FILENAME_KEY, filename);
             startActivity(intent);
         }
     };
 
-    private final View.OnClickListener wallpaperSetListener = new View.OnClickListener() {
+    private final View.OnClickListener setWallpaperListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             final String TAG = "WALLPAPER_SET_LISTENER";
 
-            String targetWallpaper;
-            if(v == findViewById(R.id.morningWallpaperSet)) {
-                targetWallpaper = MORNING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.afternoonWallpaperSet)) {
-                targetWallpaper = AFTERNOON_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.eveningWallpaperSet)) {
-                targetWallpaper = EVENING_WALLPAPER_FILENAME;
-            } else if(v == findViewById(R.id.nightWallpaperSet)) {
-                targetWallpaper = NIGHT_WALLPAPER_FILENAME;
-            } else {
+            int targetWallpaper = -1;
+            for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+                if(v == wallpaperUIs[i].setWallpaperButton) {
+                    targetWallpaper = i;
+                    break;
+                }
+            }
+            if(targetWallpaper < 0) {
                 Log.e(TAG, "Unhandled button click");
                 return;
             }
 
-            try {
-                File file = getFileStreamPath(targetWallpaper);
-                FileInputStream inputStream = new FileInputStream(file);
-                WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
-                wallpaperManager.setStream(inputStream);
-            } catch (Exception e) {
-                e.printStackTrace();
+            boolean isOk = wallpaperManager.setWallpaper(MainActivity.this, targetWallpaper);
+            if(!isOk){
                 Toast.makeText(MainActivity.this, "Unable to set wallpaper", Toast.LENGTH_SHORT).show();
             }
         }
     };
 
-    private final View.OnClickListener wallpaperTimeListener = new View.OnClickListener() {
+    private final View.OnClickListener setTimeListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             final String TAG = "WALLPAPER_TIME_LISTENER";
 
-            String hour_key;
-            String min_key;
-
-            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-
-            if(view == findViewById(R.id.morningWallpaperTime)) {
-                hour_key = MORNING_TIME_HOUR_KEY;
-                min_key = MORNING_TIME_MINUTE_KEY;
-            } else if(view == findViewById(R.id.afternoonWallpaperTime)) {
-                hour_key = AFTERNOON_TIME_HOUR_KEY;
-                min_key = AFTERNOON_TIME_MINUTE_KEY;
-            } else if(view == findViewById(R.id.eveningWallpaperTime)) {
-                hour_key = EVENING_TIME_HOUR_KEY;
-                min_key = EVENING_TIME_MINUTE_KEY;
-            } else if(view == findViewById(R.id.nightWallpaperTime)) {
-                hour_key = NIGHT_TIME_HOUR_KEY;
-                min_key = NIGHT_TIME_MINUTE_KEY;
-            } else {
+            int targetWallpaper = -1;
+            for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+                if(view == wallpaperUIs[i].setTimeButton) {
+                    targetWallpaper = i;
+                    break;
+                }
+            }
+            if(targetWallpaper < 0) {
                 Log.e(TAG, "Unhandled button click");
                 return;
             }
 
-            int default_val = -1;
-            int current_hour = preferences.getInt(hour_key, default_val);
-            int current_min = preferences.getInt(min_key, default_val);
-
-            if(current_hour < 0 || current_min < 0) {
-                Log.e(TAG, "Error getting currently set times");
-                return;
-            }
-
+            WallpaperTime currentTime = wallpaperManager.getTime(targetWallpaper);
+            int finalTargetWallpaper = targetWallpaper;
             TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
                 @Override
                 public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putInt(hour_key, hour);
-                    editor.putInt(min_key, minute);
-                    editor.apply();
+                    WallpaperTime time = new WallpaperTime(hour, minute);
+                    wallpaperManager.setTime(MainActivity.this, finalTargetWallpaper, time);
                 }
-            }, current_hour, current_min, false);
+            }, currentTime.hour, currentTime.minute, false);
             timePickerDialog.show();
         }
     };
@@ -407,83 +273,47 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
             if(isChecked) {
-                boolean morningWallpaperChosen = isFileExists(MORNING_WALLPAPER_FILENAME);
-                boolean afternoonWallpaperChosen = isFileExists(AFTERNOON_WALLPAPER_FILENAME);
-                boolean eveningWallpaperChosen = isFileExists(EVENING_WALLPAPER_FILENAME);
-                boolean nightWallpaperChosen = isFileExists(NIGHT_WALLPAPER_FILENAME);
-
-                if(!morningWallpaperChosen || !afternoonWallpaperChosen || !eveningWallpaperChosen || !nightWallpaperChosen) {
-                    Toast.makeText(getApplicationContext(), "Finish choosing all wallpapers", Toast.LENGTH_SHORT).show();
-                    compoundButton.setChecked(false);
-                    return;
+                for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+                    boolean wallpaperChosen = wallpaperManager.isWallpaperChosen(MainActivity.this, i);
+                    if(!wallpaperChosen) {
+                        Toast.makeText(getApplicationContext(), "Finish choosing all wallpapers", Toast.LENGTH_SHORT).show();
+                        compoundButton.setChecked(false);
+                        return;
+                    }
                 }
 
-                int default_val = -1;
-                SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-                int morningHour = preferences.getInt(MORNING_TIME_HOUR_KEY, default_val);
-                int morningMin = preferences.getInt(MORNING_TIME_MINUTE_KEY, default_val);
-                int afternoonHour = preferences.getInt(AFTERNOON_TIME_HOUR_KEY, default_val);
-                int afternoonMin = preferences.getInt(AFTERNOON_TIME_MINUTE_KEY, default_val);
-                int eveningHour = preferences.getInt(EVENING_TIME_HOUR_KEY, default_val);
-                int eveningMin = preferences.getInt(EVENING_TIME_MINUTE_KEY, default_val);
-                int nightHour = preferences.getInt(NIGHT_TIME_HOUR_KEY, default_val);
-                int nightMin = preferences.getInt(NIGHT_TIME_MINUTE_KEY, default_val);
-
-                Calendar currentDate = Calendar.getInstance();
-                Calendar morningDate = Calendar.getInstance();
-                morningDate.set(Calendar.SECOND, 0);
-                morningDate.set(Calendar.MILLISECOND, 0);
-                Calendar afternoonDate = morningDate;
-                Calendar eveningDate = morningDate;
-                Calendar nightDate = morningDate;
-
-                morningDate.set(Calendar.HOUR, morningHour);
-                morningDate.set(Calendar.MINUTE, morningMin);
-                afternoonDate.set(Calendar.HOUR, afternoonHour);
-                afternoonDate.set(Calendar.MINUTE, afternoonMin);
-                eveningDate.set(Calendar.HOUR, eveningHour);
-                eveningDate.set(Calendar.MINUTE, eveningMin);
-                nightDate.set(Calendar.HOUR, nightHour);
-                nightDate.set(Calendar.MINUTE, nightMin);
-
-                if(currentDate.after(morningDate)) {
-                    morningDate.add(Calendar.DATE, 1);
-                }
-                if(currentDate.after(afternoonDate)) {
-                    afternoonDate.add(Calendar.DATE, 1);
-                }
-                if(currentDate.after(eveningDate)) {
-                    eveningDate.add(Calendar.DATE, 1);
-                }
-                if(currentDate.after(nightDate)) {
-                    nightDate.add(Calendar.DATE, 1);
+                Calendar targetDate = Calendar.getInstance();
+                int currentMinutes = targetDate.get(Calendar.HOUR) * 60 + targetDate.get(Calendar.MINUTE);
+                int targetWallpaper = -1;
+                WallpaperTime targetTime = wallpaperManager.getTime(0);
+                for(int i = 0; i < NUM_WALLPAPERS; ++i) {
+                    WallpaperTime wallpaperTime = wallpaperManager.getTime(i);
+                    int wallpaperMinutes = wallpaperTime.getTimeMinutes();
+                    if(wallpaperMinutes > currentMinutes) {
+                        targetWallpaper = i;
+                        targetTime = wallpaperTime;
+                        break;
+                    }
                 }
 
-                long morningTime = morningDate.getTimeInMillis();
-                long afternoonTime = afternoonDate.getTimeInMillis();
-                long eveningTime = eveningDate.getTimeInMillis();
-                long nightTime = nightDate.getTimeInMillis();
-
-                long alarmTime = Math.min(Math.min(morningTime, afternoonTime), Math.min(eveningTime, nightTime));
-                String alarmWallpaper;
-                if(alarmTime == morningTime) {
-                    alarmWallpaper = MORNING_WALLPAPER_FILENAME;
-                } else if(alarmTime == afternoonTime) {
-                    alarmWallpaper = AFTERNOON_WALLPAPER_FILENAME;
-                } else if(alarmTime == eveningTime) {
-                    alarmWallpaper = EVENING_WALLPAPER_FILENAME;
-                } else {
-                    alarmWallpaper = NIGHT_WALLPAPER_FILENAME;
+                if(targetWallpaper < 0) {
+                    targetDate.add(Calendar.DATE, 1);
+                    targetWallpaper = 0;
                 }
+                targetDate.set(Calendar.HOUR, targetTime.hour);
+                targetDate.set(Calendar.MINUTE, targetTime.minute);
+                targetDate.set(Calendar.SECOND, 0);
+                targetDate.set(Calendar.MILLISECOND, 0);
 
-                Intent intent = new Intent(MainActivity.this, WallpaperBroadcastReceiver.class);
-                intent.putExtra(WallpaperBroadcastReceiver.WALLPAPER_FILENAME_KEY, alarmWallpaper);
+                long targetTimeMillis = targetDate.getTimeInMillis();
+                Intent intent = new Intent(MainActivity.this, WallpaperManager.class);
+                intent.putExtra(WallpaperManager.EXTRA_TARGET_WALLPAPER_KEY, targetWallpaper);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_MUTABLE);
 
                 AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                alarmManager.set(AlarmManager.RTC, 0, pendingIntent);
+                alarmManager.set(AlarmManager.RTC, targetTimeMillis, pendingIntent);
             } else {
-                Intent intent = new Intent(getApplicationContext(), WallpaperBroadcastReceiver.class);
+                Intent intent = new Intent(getApplicationContext(), WallpaperManager.class);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_MUTABLE);
 
                 AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -492,8 +322,35 @@ public class MainActivity extends AppCompatActivity {
 
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean(AUTO_CHANGE_KEY, isChecked);
+            editor.putBoolean(PREFERENCES_AUTO_CHANGE_KEY, isChecked);
             editor.apply();
         }
     };
+
+    private class WallpaperUI {
+        public TextView chooseWallpaperText;
+        public Button chooseWallpaperButton;
+        public Button clearWallpaperButton;
+        public Button previewWallpaperButton;
+        public Button setWallpaperButton;
+        public Button setTimeButton;
+
+        public void setListeners() {
+            chooseWallpaperButton.setOnClickListener(chooseWallpaperListener);
+            clearWallpaperButton.setOnClickListener(clearWallpaperListener);
+            previewWallpaperButton.setOnClickListener(previewWallpaperListener);
+            setWallpaperButton.setOnClickListener(setWallpaperListener);
+            setTimeButton.setOnClickListener(setTimeListener);
+        }
+
+        public void setVisibilities(boolean wallpaperChosen) {
+            chooseWallpaperText.setVisibility(wallpaperChosen ? View.INVISIBLE : View.VISIBLE);
+            clearWallpaperButton.setVisibility(wallpaperChosen ? View.VISIBLE : View.GONE);
+        }
+
+        public void setClickabilities(boolean wallpaperChosen) {
+            previewWallpaperButton.setClickable(wallpaperChosen);
+            setWallpaperButton.setClickable(wallpaperChosen);
+        }
+    }
 }

@@ -79,27 +79,42 @@ public class WallpaperManager {
         targetDate.set(Calendar.MILLISECOND, 0);
 
         long targetTimeMillis = targetDate.getTimeInMillis();
-        Intent intent = getBroadcastIntent(context);
-        intent.putExtra(WallpaperManager.EXTRA_TARGET_WALLPAPER_KEY, targetWallpaper);
-        PendingIntent pendingIntent = getBroadcastPendingIntent(context, intent);
-
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC, targetTimeMillis, pendingIntent);
+        setAlarm(context, targetTimeMillis, targetWallpaper);
 
         return true;
     }
 
     public void stopAutoChange(Context context) {
-        Intent intent = getBroadcastIntent(context);
-        PendingIntent pendingIntent = getBroadcastPendingIntent(context, intent);
-
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
+        cancelAlarm(context);
     }
 
     public void onReceiveBroadcast(Context context, Intent intent) {
+        // Set wallpaper
         int default_value = -1;
-        int targetWallpaper = intent.getIntExtra(EXTRA_TARGET_WALLPAPER_KEY, default_value);
+        int targetWallpaperIndex = intent.getIntExtra(EXTRA_TARGET_WALLPAPER_KEY, default_value);
+        Wallpaper wallpaper = new Wallpaper(context, targetWallpaperIndex);
+        wallpaper.setWallpaper(context);
+
+        // Get info about next wallpaper
+        recoverNumWallpapers(context);
+        Calendar nextAlarmDate = Calendar.getInstance();
+        int nextWallpaperIndex = targetWallpaperIndex + 1;
+        if(nextWallpaperIndex >= numWallpapers) {
+            nextWallpaperIndex = 0;
+            nextAlarmDate.add(Calendar.DATE, 1);
+        }
+
+        // Set date of next wallpaper
+        Wallpaper nextWallpaper = new Wallpaper(context, nextWallpaperIndex);
+        WallpaperTime nextTime = nextWallpaper.getTime();
+        nextAlarmDate.set(Calendar.HOUR_OF_DAY, nextTime.hour);
+        nextAlarmDate.set(Calendar.MINUTE, nextTime.minute);
+        nextAlarmDate.set(Calendar.SECOND, 0);
+        nextAlarmDate.set(Calendar.MILLISECOND, 0);
+
+        // Start new alarm
+        long nextAlarmTimeMillis = nextAlarmDate.getTimeInMillis();
+        setAlarm(context, nextAlarmTimeMillis, nextWallpaperIndex);
     }
 
     public boolean isWallpaperChosen(Context context, int index) {
@@ -142,6 +157,23 @@ public class WallpaperManager {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFERENCES_FILENAME, MODE_PRIVATE);
         int default_value = 0;
         numWallpapers = sharedPreferences.getInt(PREFERENCES_NUM_WALLPAPERS, default_value);
+    }
+
+    private void setAlarm(Context context, long timeMillis, int wallpaper) {
+        Intent intent = getBroadcastIntent(context);
+        intent.putExtra(WallpaperManager.EXTRA_TARGET_WALLPAPER_KEY, wallpaper);
+        PendingIntent pendingIntent = getBroadcastPendingIntent(context, intent);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC, timeMillis, pendingIntent);
+    }
+
+    private void cancelAlarm(Context context) {
+        Intent intent = getBroadcastIntent(context);
+        PendingIntent pendingIntent = getBroadcastPendingIntent(context, intent);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
     }
 
     private Intent getBroadcastIntent(Context context) {

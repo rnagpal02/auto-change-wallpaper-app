@@ -2,7 +2,6 @@ package com.example.autochangewallpaperapp;
 
 import static android.content.Context.*;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,12 +12,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-public class WallpaperManager extends BroadcastReceiver {
+public class WallpaperManager {
     public static final String EXTRA_TARGET_WALLPAPER_KEY = "target_wallpaper";
     private final String PREFERENCES_FILENAME = "wallpaper_manager";
     private final String PREFERENCES_NUM_WALLPAPERS = "num_wallpapers";
 
-    private static WallpaperManager wallpaperManager = new WallpaperManager();
+    private static final WallpaperManager wallpaperManager = new WallpaperManager();
 
     private Wallpaper[] wallpapers;
     private int numWallpapers;
@@ -87,29 +86,26 @@ public class WallpaperManager extends BroadcastReceiver {
         numWallpapers = sharedPreferences.getInt(PREFERENCES_NUM_WALLPAPERS, default_value);
     }
 
-    @Override
     public void onReceive(Context context, Intent intent) {
-        // TODO
+        int default_value = -1;
+        int targetWallpaper = intent.getIntExtra(EXTRA_TARGET_WALLPAPER_KEY, default_value);
     }
 
     private class Wallpaper {
         private final String FILENAME_PREFIX = "wallpaper_";
         private final String PREFERENCES_TIME = "/time";
 
-        private String filename;
-        private int index;
+        private final String filename;
         private WallpaperTime time;
-        private String preferencesTimeKey;
+        private final String preferencesTimeKey;
 
         public Wallpaper(Context context, WallpaperTime time, int index) {
-            this.index = index;
             filename = FILENAME_PREFIX + index;
             preferencesTimeKey = filename + PREFERENCES_TIME;
             setTime(context, time);
         }
 
         public Wallpaper(Context context, int index) {
-            this.index = index;
             filename = FILENAME_PREFIX + index;
             preferencesTimeKey = filename + PREFERENCES_TIME;
             recoverTime(context);
@@ -118,7 +114,7 @@ public class WallpaperManager extends BroadcastReceiver {
         public boolean downloadWallpaper(Context context, Uri uri) {
             if(uri != null) {
                 try {
-                    InputStream inputStream = (FileInputStream) context.getContentResolver().openInputStream(uri);
+                    InputStream inputStream = context.getContentResolver().openInputStream(uri);
                     FileOutputStream outputStream = context.openFileOutput(filename, MODE_PRIVATE);
 
                     byte[] buffer = new byte[1024*4];

@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 Calendar targetDate = Calendar.getInstance();
-                int currentMinutes = targetDate.get(Calendar.HOUR) * 60 + targetDate.get(Calendar.MINUTE);
+                int currentMinutes = targetDate.get(Calendar.HOUR_OF_DAY) * 60 + targetDate.get(Calendar.MINUTE);
                 int targetWallpaper = -1;
                 WallpaperTime targetTime = wallpaperManager.getTime(0);
                 for(int i = 0; i < NUM_WALLPAPERS; ++i) {
@@ -300,21 +300,21 @@ public class MainActivity extends AppCompatActivity {
                     targetDate.add(Calendar.DATE, 1);
                     targetWallpaper = 0;
                 }
-                targetDate.set(Calendar.HOUR, targetTime.hour);
+                targetDate.set(Calendar.HOUR_OF_DAY, targetTime.hour);
                 targetDate.set(Calendar.MINUTE, targetTime.minute);
                 targetDate.set(Calendar.SECOND, 0);
                 targetDate.set(Calendar.MILLISECOND, 0);
 
                 long targetTimeMillis = targetDate.getTimeInMillis();
-                Intent intent = new Intent(MainActivity.this, WallpaperManager.class);
+                Intent intent = getBroadcastIntent();
                 intent.putExtra(WallpaperManager.EXTRA_TARGET_WALLPAPER_KEY, targetWallpaper);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_MUTABLE);
+                PendingIntent pendingIntent = getBroadcastPendingIntent(intent);
 
                 AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                 alarmManager.set(AlarmManager.RTC, targetTimeMillis, pendingIntent);
             } else {
-                Intent intent = new Intent(getApplicationContext(), WallpaperManager.class);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_MUTABLE);
+                Intent intent = getBroadcastIntent();
+                PendingIntent pendingIntent = getBroadcastPendingIntent(intent);
 
                 AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
                 alarmManager.cancel(pendingIntent);
@@ -326,6 +326,14 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
     };
+
+    private Intent getBroadcastIntent() {
+        return new Intent(MainActivity.this, WallpaperBroadcastReceiver.class);
+    }
+
+    private PendingIntent getBroadcastPendingIntent(Intent intent) {
+        return PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
 
     private class WallpaperUI {
         public TextView chooseWallpaperText;

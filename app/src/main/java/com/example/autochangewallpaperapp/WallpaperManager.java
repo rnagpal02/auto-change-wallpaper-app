@@ -2,6 +2,8 @@ package com.example.autochangewallpaperapp;
 
 import static android.content.Context.*;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Calendar;
 
 public class WallpaperManager {
     public static final String EXTRA_TARGET_WALLPAPER_KEY = "target_wallpaper";
@@ -42,6 +45,61 @@ public class WallpaperManager {
         for(int i = 0; i < numWallpapers; ++i) {
             wallpapers[i] = new Wallpaper(context, i);
         }
+    }
+
+    public boolean startAutoChange(Context context) {
+        for(int i = 0; i < numWallpapers; ++i) {
+            boolean wallpaperChosen = isWallpaperChosen(context, i);
+            if(!wallpaperChosen) {
+                return false;
+            }
+        }
+
+        Calendar targetDate = Calendar.getInstance();
+        int currentMinutes = targetDate.get(Calendar.HOUR_OF_DAY) * 60 + targetDate.get(Calendar.MINUTE);
+        int targetWallpaper = -1;
+        WallpaperTime targetTime = wallpaperManager.getTime(0);
+        for(int i = 0; i < numWallpapers; ++i) {
+            WallpaperTime wallpaperTime = wallpaperManager.getTime(i);
+            int wallpaperMinutes = wallpaperTime.getTimeMinutes();
+            if(wallpaperMinutes > currentMinutes) {
+                targetWallpaper = i;
+                targetTime = wallpaperTime;
+                break;
+            }
+        }
+
+        if(targetWallpaper < 0) {
+            targetDate.add(Calendar.DATE, 1);
+            targetWallpaper = 0;
+        }
+        targetDate.set(Calendar.HOUR_OF_DAY, targetTime.hour);
+        targetDate.set(Calendar.MINUTE, targetTime.minute);
+        targetDate.set(Calendar.SECOND, 0);
+        targetDate.set(Calendar.MILLISECOND, 0);
+
+        long targetTimeMillis = targetDate.getTimeInMillis();
+        Intent intent = getBroadcastIntent(context);
+        intent.putExtra(WallpaperManager.EXTRA_TARGET_WALLPAPER_KEY, targetWallpaper);
+        PendingIntent pendingIntent = getBroadcastPendingIntent(context, intent);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC, targetTimeMillis, pendingIntent);
+
+        return true;
+    }
+
+    public void stopAutoChange(Context context) {
+        Intent intent = getBroadcastIntent(context);
+        PendingIntent pendingIntent = getBroadcastPendingIntent(context, intent);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+    }
+
+    public void onReceiveBroadcast(Context context, Intent intent) {
+        int default_value = -1;
+        int targetWallpaper = intent.getIntExtra(EXTRA_TARGET_WALLPAPER_KEY, default_value);
     }
 
     public boolean isWallpaperChosen(Context context, int index) {
@@ -86,9 +144,12 @@ public class WallpaperManager {
         numWallpapers = sharedPreferences.getInt(PREFERENCES_NUM_WALLPAPERS, default_value);
     }
 
-    public void onReceive(Context context, Intent intent) {
-        int default_value = -1;
-        int targetWallpaper = intent.getIntExtra(EXTRA_TARGET_WALLPAPER_KEY, default_value);
+    private Intent getBroadcastIntent(Context context) {
+        return new Intent(context, WallpaperBroadcastReceiver.class);
+    }
+
+    private PendingIntent getBroadcastPendingIntent(Context context, Intent intent) {
+        return PendingIntent.getBroadcast(context.getApplicationContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private class Wallpaper {

@@ -5,8 +5,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,8 +18,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
-import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
     private final String PREFERENCES_FIRST_RUN_KEY = "first_run";
@@ -273,51 +269,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
             if(isChecked) {
-                for(int i = 0; i < NUM_WALLPAPERS; ++i) {
-                    boolean wallpaperChosen = wallpaperManager.isWallpaperChosen(MainActivity.this, i);
-                    if(!wallpaperChosen) {
-                        Toast.makeText(getApplicationContext(), "Finish choosing all wallpapers", Toast.LENGTH_SHORT).show();
-                        compoundButton.setChecked(false);
-                        return;
-                    }
+                boolean isOk = wallpaperManager.startAutoChange(MainActivity.this);
+                if(!isOk) {
+                    Toast.makeText(getApplicationContext(), "Finish choosing all wallpapers", Toast.LENGTH_SHORT).show();
+                    compoundButton.setChecked(false);
+                    return;
                 }
-
-                Calendar targetDate = Calendar.getInstance();
-                int currentMinutes = targetDate.get(Calendar.HOUR_OF_DAY) * 60 + targetDate.get(Calendar.MINUTE);
-                int targetWallpaper = -1;
-                WallpaperTime targetTime = wallpaperManager.getTime(0);
-                for(int i = 0; i < NUM_WALLPAPERS; ++i) {
-                    WallpaperTime wallpaperTime = wallpaperManager.getTime(i);
-                    int wallpaperMinutes = wallpaperTime.getTimeMinutes();
-                    if(wallpaperMinutes > currentMinutes) {
-                        targetWallpaper = i;
-                        targetTime = wallpaperTime;
-                        break;
-                    }
-                }
-
-                if(targetWallpaper < 0) {
-                    targetDate.add(Calendar.DATE, 1);
-                    targetWallpaper = 0;
-                }
-                targetDate.set(Calendar.HOUR_OF_DAY, targetTime.hour);
-                targetDate.set(Calendar.MINUTE, targetTime.minute);
-                targetDate.set(Calendar.SECOND, 0);
-                targetDate.set(Calendar.MILLISECOND, 0);
-
-                long targetTimeMillis = targetDate.getTimeInMillis();
-                Intent intent = getBroadcastIntent();
-                intent.putExtra(WallpaperManager.EXTRA_TARGET_WALLPAPER_KEY, targetWallpaper);
-                PendingIntent pendingIntent = getBroadcastPendingIntent(intent);
-
-                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                alarmManager.set(AlarmManager.RTC, targetTimeMillis, pendingIntent);
             } else {
-                Intent intent = getBroadcastIntent();
-                PendingIntent pendingIntent = getBroadcastPendingIntent(intent);
-
-                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                alarmManager.cancel(pendingIntent);
+                wallpaperManager.stopAutoChange(MainActivity.this);
             }
 
             SharedPreferences preferences = getPreferences(MODE_PRIVATE);
@@ -326,14 +285,6 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
     };
-
-    private Intent getBroadcastIntent() {
-        return new Intent(MainActivity.this, WallpaperBroadcastReceiver.class);
-    }
-
-    private PendingIntent getBroadcastPendingIntent(Intent intent) {
-        return PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-    }
 
     private class WallpaperUI {
         public TextView chooseWallpaperText;

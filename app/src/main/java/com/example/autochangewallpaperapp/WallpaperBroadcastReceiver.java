@@ -7,6 +7,6 @@ import android.content.Intent;
 public class WallpaperBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        WallpaperManager.getWallpaperManager().onReceive(context, intent);
+        WallpaperManager.getWallpaperManager().onReceiveBroadcast(context, intent);
     }
 }

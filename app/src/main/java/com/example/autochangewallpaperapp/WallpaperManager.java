@@ -48,6 +48,7 @@ public class WallpaperManager {
     }
 
     public boolean startAutoChange(Context context) {
+        // Make sure all wallpapers have been chosen
         for(int i = 0; i < numWallpapers; ++i) {
             boolean wallpaperChosen = isWallpaperChosen(context, i);
             if(!wallpaperChosen) {
@@ -55,6 +56,7 @@ public class WallpaperManager {
             }
         }
 
+        // Find the closest upcoming wallpaper time-wise
         Calendar targetDate = Calendar.getInstance();
         int currentMinutes = targetDate.get(Calendar.HOUR_OF_DAY) * 60 + targetDate.get(Calendar.MINUTE);
         int targetWallpaper = -1;
@@ -68,11 +70,20 @@ public class WallpaperManager {
                 break;
             }
         }
-
+        // If the target wasn't found above, the next one is the first wallpaper on the next day
         if(targetWallpaper < 0) {
             targetDate.add(Calendar.DATE, 1);
             targetWallpaper = 0;
         }
+
+        // Set the previous wallpaper to maintain the cycle
+        int previousWallpaper = targetWallpaper - 1;
+        if(previousWallpaper < 0) {
+            previousWallpaper = numWallpapers - 1;
+        }
+        wallpapers[previousWallpaper].setWallpaper(context);
+
+        // Set Calendar values
         targetDate.set(Calendar.HOUR_OF_DAY, targetTime.hour);
         targetDate.set(Calendar.MINUTE, targetTime.minute);
         targetDate.set(Calendar.SECOND, 0);

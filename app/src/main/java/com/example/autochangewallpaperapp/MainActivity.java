@@ -4,6 +4,8 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     com.example.autochangewallpaperapp.WallpaperManager wallpaperManager; // TODO change class name
     WallpaperUI[] wallpaperUIs;
+    private RecyclerView wallpaperRecycler;
     private Switch autoChangeWallpaper;
 
     @Override
@@ -41,45 +44,17 @@ public class MainActivity extends AppCompatActivity {
             wallpaperUIs[i] = new WallpaperUI();
         }
 
-        wallpaperUIs[0].chooseWallpaperText = findViewById(R.id.morningWallpaperText);
-        wallpaperUIs[1].chooseWallpaperText = findViewById(R.id.afternoonWallpaperText);
-        wallpaperUIs[2].chooseWallpaperText = findViewById(R.id.eveningWallpaperText);
-        wallpaperUIs[3].chooseWallpaperText = findViewById(R.id.nightWallpaperText);
-
-        wallpaperUIs[0].chooseWallpaperButton = findViewById(R.id.morningWallpaperChoose);
-        wallpaperUIs[1].chooseWallpaperButton = findViewById(R.id.afternoonWallpaperChoose);
-        wallpaperUIs[2].chooseWallpaperButton = findViewById(R.id.eveningWallpaperChoose);
-        wallpaperUIs[3].chooseWallpaperButton = findViewById(R.id.nightWallpaperChoose);
-
-        wallpaperUIs[0].clearWallpaperButton = findViewById(R.id.morningWallpaperClear);
-        wallpaperUIs[1].clearWallpaperButton = findViewById(R.id.afternoonWallpaperClear);
-        wallpaperUIs[2].clearWallpaperButton = findViewById(R.id.eveningWallpaperClear);
-        wallpaperUIs[3].clearWallpaperButton = findViewById(R.id.nightWallpaperClear);
-
-        wallpaperUIs[0].previewWallpaperButton = findViewById(R.id.morningWallpaperPreview);
-        wallpaperUIs[1].previewWallpaperButton = findViewById(R.id.afternoonWallpaperPreview);
-        wallpaperUIs[2].previewWallpaperButton = findViewById(R.id.eveningWallpaperPreview);
-        wallpaperUIs[3].previewWallpaperButton = findViewById(R.id.nightWallpaperPreview);
-
-        wallpaperUIs[0].setWallpaperButton = findViewById(R.id.morningWallpaperSet);
-        wallpaperUIs[1].setWallpaperButton = findViewById(R.id.afternoonWallpaperSet);
-        wallpaperUIs[2].setWallpaperButton = findViewById(R.id.eveningWallpaperSet);
-        wallpaperUIs[3].setWallpaperButton = findViewById(R.id.nightWallpaperSet);
-
-        wallpaperUIs[0].setTimeButton = findViewById(R.id.morningWallpaperTime);
-        wallpaperUIs[1].setTimeButton = findViewById(R.id.afternoonWallpaperTime);
-        wallpaperUIs[2].setTimeButton = findViewById(R.id.eveningWallpaperTime);
-        wallpaperUIs[3].setTimeButton = findViewById(R.id.nightWallpaperTime);
+        wallpaperRecycler = findViewById(R.id.wallpaperRecycler);
+        wallpaperRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        WallpaperAdapter adapter = new WallpaperAdapter();
+        wallpaperRecycler.setAdapter(adapter);
 
         autoChangeWallpaper = findViewById(R.id.autoChangeSwitch);
 
-        for(WallpaperUI ui : wallpaperUIs) {
-            ui.setListeners();
-        }
         autoChangeWallpaper.setOnCheckedChangeListener(autoChangeListener);
 
-        checkFirstRun();
-        updateUI();
+//        checkFirstRun();
+//        updateUI();
     }
 
     private void checkFirstRun() {

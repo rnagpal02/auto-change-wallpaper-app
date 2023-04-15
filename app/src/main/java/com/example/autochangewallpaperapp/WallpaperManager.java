@@ -156,6 +156,10 @@ public class WallpaperManager {
         return wallpapers[index].getFilename();
     }
 
+    public int getNumWallpapers() {
+        return numWallpapers;
+    }
+
     private void setNumWallpapers(Context context, int numWallpapers) {
         this.numWallpapers = numWallpapers;
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFERENCES_FILENAME, MODE_PRIVATE);

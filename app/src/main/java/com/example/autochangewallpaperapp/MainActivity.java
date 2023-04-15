@@ -2,6 +2,7 @@ package com.example.autochangewallpaperapp;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,11 +14,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -78,41 +76,36 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
 
     @Override
     public void onChooseClick(int position) {
-        final String TAG = "WALLPAPER_CHOOSE_LISTENER";
-
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(PREFERENCES_TARGET_WALLPAPER_KEY, position);
         editor.apply();
 
-        chooseWallpaper.launch("image/*");
+        chooseWallpaper.launch(new PickVisualMediaRequest.Builder()
+                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                .build());
     }
 
-    private final ActivityResultLauncher<String> chooseWallpaper = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            new ActivityResultCallback<Uri>() {
-                @Override
-                public void onActivityResult(Uri result) {
-                    final String TAG = "CHOOSE_WALLPAPER_ACTIVITY_RESULT";
+    ActivityResultLauncher<PickVisualMediaRequest> chooseWallpaper = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+        final String TAG = "CHOOSE_WALLPAPER_ACTIVITY_RESULT";
 
-                    int targetWallpaper;
-                    int default_value = -1;
-                    SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-                    targetWallpaper = preferences.getInt(PREFERENCES_TARGET_WALLPAPER_KEY, default_value);
-                    if(targetWallpaper == default_value) {
-                        Log.e(TAG, "Target wallpaper not found");
-                        return;
-                    }
+        int targetWallpaper;
+        int default_value = -1;
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        targetWallpaper = preferences.getInt(PREFERENCES_TARGET_WALLPAPER_KEY, default_value);
+        if(targetWallpaper == default_value) {
+            Log.e(TAG, "Target wallpaper not found");
+            return;
+        }
 
-                    boolean isOk = wallpaperManager.downloadWallpaper(MainActivity.this, targetWallpaper, result);
-                    if(!isOk) {
-                        Toast.makeText(MainActivity.this, "Error downloading wallpaper", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        boolean isOk = wallpaperManager.downloadWallpaper(MainActivity.this, targetWallpaper, uri);
+        if(!isOk) {
+            Toast.makeText(MainActivity.this, "Error downloading wallpaper", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                    updateUI();
-                }
-            });
+        updateUI();
+    });
 
     @Override
     public void onClearClick(int position) {

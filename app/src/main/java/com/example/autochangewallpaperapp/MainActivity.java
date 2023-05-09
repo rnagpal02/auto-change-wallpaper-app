@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
 
     com.example.autochangewallpaperapp.WallpaperManager wallpaperManager; // TODO change class name
     private RecyclerView wallpaperRecycler;
+    private WallpaperAdapter adapter;
     private Switch autoChangeWallpaper;
 
     @Override
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
 
         wallpaperRecycler = findViewById(R.id.wallpaperRecycler);
         wallpaperRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        WallpaperAdapter adapter = new WallpaperAdapter(this, this);
+        adapter = new WallpaperAdapter(this, this);
         wallpaperRecycler.setAdapter(adapter);
 
         autoChangeWallpaper = findViewById(R.id.autoChangeSwitch);
@@ -104,12 +105,14 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
             return;
         }
 
+        adapter.notifyItemChanged(targetWallpaper);
         updateUI();
     });
 
     @Override
     public void onClearClick(int position) {
         wallpaperManager.clearWallpaper(MainActivity.this, position);
+        adapter.notifyItemChanged(position);
         updateUI();
     }
 

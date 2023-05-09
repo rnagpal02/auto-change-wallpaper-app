@@ -60,24 +60,27 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
         public void onBindViewHolder(int position) {
             this.position = position;
 
-            Bitmap bitmap = wallpaperManager.getBitmap(context, position);
-            if(bitmap.getWidth() > bitmap.getHeight()) {
-                Matrix matrix = new Matrix();
-                matrix.postRotate(90);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            }
-
             // Set width and height of imageview
             int imageWidth = (int)(context.getResources().getDisplayMetrics().widthPixels * PREVIEW_SCALE);
             int imageHeight = (int)(context.getResources().getDisplayMetrics().heightPixels * PREVIEW_SCALE);
             preview.getLayoutParams().width = imageWidth;
             preview.getLayoutParams().height = imageHeight;
 
-            // Scale image so one dimension fits perfectly in view, and second dimension is at least as big as view
-            double widthScale = (double)(imageWidth) / (double)(bitmap.getWidth());
-            double heightScale = (double)imageHeight / (double)bitmap.getHeight();
-            double scale = Double.max(widthScale, heightScale);
-            preview.setImageBitmap(Bitmap.createScaledBitmap(bitmap, (int)(bitmap.getWidth() * scale), (int)(bitmap.getHeight() * scale), true));
+            // Rotate image to portrait view
+            Bitmap bitmap = wallpaperManager.getBitmap(context, position);
+            if(bitmap != null) {
+                if (bitmap.getWidth() > bitmap.getHeight()) {
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(90);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                }
+
+                // Scale image so one dimension fits perfectly in view, and second dimension is at least as big as view
+                double widthScale = (double) (imageWidth) / (double) (bitmap.getWidth());
+                double heightScale = (double) imageHeight / (double) bitmap.getHeight();
+                double scale = Double.max(widthScale, heightScale);
+                preview.setImageBitmap(Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * scale), (int) (bitmap.getHeight() * scale), true));
+            }
 
             choose.setOnClickListener(chooseWallpaperListener);
             clear.setOnClickListener(clearWallpaperListener);

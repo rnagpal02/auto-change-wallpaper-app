@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
 
         wallpaperRecycler = findViewById(R.id.wallpaperRecycler);
         wallpaperRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        WallpaperAdapter adapter = new WallpaperAdapter(this);
+        WallpaperAdapter adapter = new WallpaperAdapter(this, this);
         wallpaperRecycler.setAdapter(adapter);
 
         autoChangeWallpaper = findViewById(R.id.autoChangeSwitch);
@@ -111,14 +111,6 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
     public void onClearClick(int position) {
         wallpaperManager.clearWallpaper(MainActivity.this, position);
         updateUI();
-    }
-
-    @Override
-    public void onPreviewClick(int position) {
-        String filename = wallpaperManager.getFilename(position);
-        Intent intent = new Intent(getApplicationContext(), WallpaperPreview.class);
-        intent.putExtra(WallpaperPreview.EXTRA_WALLPAPER_FILENAME_KEY, filename);
-        startActivity(intent);
     }
 
     @Override

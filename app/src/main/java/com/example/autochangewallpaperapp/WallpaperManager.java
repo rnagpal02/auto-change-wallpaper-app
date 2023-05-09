@@ -7,6 +7,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 
 import java.io.File;
@@ -152,6 +154,10 @@ public class WallpaperManager {
         wallpapers[index].setTime(context, time);
     }
 
+    public Bitmap getBitmap(Context context, int index) {
+        return wallpapers[index].getBitmap(context);
+    }
+
     public String getFilename(int index) {
         return wallpapers[index].getFilename();
     }
@@ -281,6 +287,12 @@ public class WallpaperManager {
             int default_value = 0;
             int minutes = preferences.getInt(preferencesTimeKey, default_value);
             time = new WallpaperTime(minutes);
+        }
+
+        public Bitmap getBitmap(Context context) {
+            String absolutePath = context.getFileStreamPath(filename).getAbsolutePath();
+            Bitmap bitmap = BitmapFactory.decodeFile(absolutePath);
+            return bitmap;
         }
 
         public String getFilename() {

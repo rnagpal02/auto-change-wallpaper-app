@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/Widget.Material3.CardView.Elevated"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_margin="12dp">
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center|top"
-    android:orientation="vertical"
-    android:layout_margin="8dp">
-
-        <com.google.android.material.textview.MaterialTextView
-            style="@style/TextAppearance.Material3.TitleMedium"
-            android:id="@+id/name"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="TextView" />
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:gravity="center|top"
+            android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button"
-            android:id="@+id/choose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/name"
+                    style="@style/TextAppearance.Material3.TitleMedium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="TextView" />
 
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button"
-            android:id="@+id/clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Clear" />
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/preview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="center" />
 
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button"
-            android:id="@+id/preview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Preview" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/choose"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose" />
 
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button"
-            android:id="@+id/set"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Set" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/clear"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clear" />
 
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.Material3.Button"
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Time" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/set"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set" />
 
-</LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/time"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time" />
+
+        </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -29,9 +29,9 @@
         app:layout_constraintStart_toStartOf="@+id/autoChangeSwitch"
         app:layout_constraintTop_toBottomOf="@+id/wallpaperRecycler" />
 
-    <Switch
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/autoChangeSwitch"
-        style="@style/Widget.Material3.CompoundButton.Switch"
+        style="@style/Widget.Material3.CompoundButton.MaterialSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

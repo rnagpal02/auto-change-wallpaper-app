@@ -1,6 +1,5 @@
 package com.example.autochangewallpaperapp;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -9,15 +8,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
-import android.widget.Switch;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 public class MainActivity extends AppCompatActivity implements WallpaperAdapter.OnClickListeners {
     private final String PREFERENCES_FIRST_RUN_KEY = "first_run";
@@ -27,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
     com.example.autochangewallpaperapp.WallpaperManager wallpaperManager; // TODO change class name
     private RecyclerView wallpaperRecycler;
     private WallpaperAdapter adapter;
-    private Switch autoChangeWallpaper;
+    private MaterialSwitch autoChangeWallpaper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

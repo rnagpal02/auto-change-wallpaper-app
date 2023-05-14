@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Environment;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -234,7 +235,7 @@ public class WallpaperManager {
         }
 
         public void checkImage(Context context) {
-            File file = context.getFileStreamPath(filename);
+            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
             if(!file.exists()) {
                 bitmap = null;
             } else {
@@ -302,10 +303,10 @@ public class WallpaperManager {
                     bitmap = Bitmap.createBitmap(bitmap, startWidth, startHeight, imageWidth, imageHeight);
                     this.bitmap = bitmap;
 
-                    FileOutputStream outputStream = context.openFileOutput(filename, MODE_PRIVATE);
+                    File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
+                    FileOutputStream outputStream = new FileOutputStream(file);
                     boolean result = bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
                     outputStream.close();
-
                     return result;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -328,13 +329,13 @@ public class WallpaperManager {
         }
 
         public void clearWallpaper(Context context) {
-            File file = context.getFileStreamPath(filename);
+            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
             file.delete();
             bitmap = null;
         }
 
         boolean isWallpaperChosen(Context context) {
-            File file = context.getFileStreamPath(filename);
+            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
             return file.exists();
         }
 

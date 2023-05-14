@@ -23,7 +23,7 @@
                     android:text="TextView" />
 
                 <RelativeLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                         <com.google.android.material.imageview.ShapeableImageView
                             android:id="@+id/preview"
@@ -43,7 +43,7 @@
                             app:iconSize="24dp"
                             app:icon="@drawable/delete_48px" />
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/choose"
+                            android:id="@+id/set"
                             style="@style/Widget.Material3.Button.IconButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -51,28 +51,22 @@
                             android:layout_alignBottom="@+id/clear"
                             app:iconSize="24dp"
                             app:icon="@drawable/wallpaper_48px" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/choose"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toLeftOf="@+id/set"
+                            android:layout_alignBottom="@+id/set"
+                            app:iconSize="24dp"
+                            app:icon="@drawable/upload_48px" />
                 </RelativeLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/time"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center" >
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/set"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Set"
-                            android:layout_marginHorizontal="8dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/time"
-                            style="@style/Widget.Material3.Button.TonalButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Time"
-                            android:layout_marginHorizontal="8dp" />
-                </LinearLayout>
+                    android:layout_marginHorizontal="8dp" />
         </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

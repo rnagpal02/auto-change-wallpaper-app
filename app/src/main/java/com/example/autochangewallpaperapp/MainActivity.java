@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
             public void onTimeSet(TimePicker timePicker, int hour, int minute) {
                 WallpaperTime time = new WallpaperTime(hour, minute);
                 wallpaperManager.setTime(MainActivity.this, finalTargetWallpaper, time);
+                adapter.notifyItemChanged(finalTargetWallpaper);
             }
         }, currentTime.hour, currentTime.minute, false);
         timePickerDialog.show();

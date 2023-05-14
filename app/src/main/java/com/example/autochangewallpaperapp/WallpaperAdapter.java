@@ -82,7 +82,19 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
             choose.setOnClickListener(chooseWallpaperListener);
             clear.setOnClickListener(clearWallpaperListener);
             set.setOnClickListener(setWallpaperListener);
+
+            // Set text of time button to be wallpaper's time
+            WallpaperTime wallpaperTime = wallpaperManager.getTime(position);
+            boolean isAM = wallpaperTime.hour < 12;
+            int hour = wallpaperTime.hour % 12;
+            if(hour == 0) {
+                hour = 12;
+            }
+            int minute = wallpaperTime.minute;
+            String timeText = hour + ":" + String.format("%02d", minute) + " " + (isAM ? "AM" : "PM");
+            time.setText(timeText);
             time.setOnClickListener(timeWallpaperListener);
+
             name.setText("Wallpaper " + position);
         }
 

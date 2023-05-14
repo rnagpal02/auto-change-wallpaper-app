@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 
 import java.io.File;
@@ -154,8 +156,8 @@ public class WallpaperManager {
         wallpapers[index].setTime(context, time);
     }
 
-    public Bitmap getBitmap(Context context, int index) {
-        return wallpapers[index].getBitmap(context);
+    public Bitmap getBitmap(int index) {
+        return wallpapers[index].getBitmap();
     }
 
     public String getFilename(int index) {
@@ -210,35 +212,101 @@ public class WallpaperManager {
         private final String PREFERENCES_TIME = "/time";
 
         private final String filename;
+        private Bitmap bitmap;
         private WallpaperTime time;
         private final String preferencesTimeKey;
 
         public Wallpaper(Context context, WallpaperTime time, int index) {
             filename = FILENAME_PREFIX + index;
             preferencesTimeKey = filename + PREFERENCES_TIME;
-            setTime(context, time);
+
+            if(time != null) {
+                setTime(context, time);
+            } else {
+                recoverTime(context);
+            }
+
+            checkImage(context);
         }
 
         public Wallpaper(Context context, int index) {
-            filename = FILENAME_PREFIX + index;
-            preferencesTimeKey = filename + PREFERENCES_TIME;
-            recoverTime(context);
+            this(context, null, index);
+        }
+
+        public void checkImage(Context context) {
+            File file = context.getFileStreamPath(filename);
+            if(!file.exists()) {
+                bitmap = null;
+            } else {
+                try {
+                    FileInputStream inputStream = new FileInputStream(file);
+                    bitmap = BitmapFactory.decodeStream(inputStream);
+                    inputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         public boolean downloadWallpaper(Context context, Uri uri) {
             if(uri != null) {
                 try {
                     InputStream inputStream = context.getContentResolver().openInputStream(uri);
-                    FileOutputStream outputStream = context.openFileOutput(filename, MODE_PRIVATE);
-
-                    byte[] buffer = new byte[1024*4];
-                    while(inputStream.read(buffer) != -1) {
-                        outputStream.write(buffer);
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    if(bitmap == null) {
+                        inputStream.close();
+                        return false;
                     }
 
+                    inputStream = context.getContentResolver().openInputStream(uri);
+                    ExifInterface exifInterface = new ExifInterface(inputStream);
                     inputStream.close();
+
+                    int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                    int rotation;
+                    switch(orientation) {
+                        case ExifInterface.ORIENTATION_ROTATE_90:
+                            rotation = 90;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_180:
+                            rotation = 180;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_270:
+                            rotation = 270;
+                            break;
+                        default:
+                            rotation = 0;
+                            break;
+                    }
+
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(rotation);
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+                    int imageHeight = bitmap.getHeight();
+                    int imageWidth = bitmap.getWidth();
+                    float imageAspectRatio = (float)(imageHeight) / (float)(imageWidth);
+                    float displayAspectRatio = (float)(context.getResources().getDisplayMetrics().heightPixels) / (float)(context.getResources().getDisplayMetrics().widthPixels);
+                    int startHeight = 0, startWidth = 0;
+
+                    // Image is too tall
+                    if(imageAspectRatio > displayAspectRatio) {
+                        imageHeight = (int)(imageWidth * displayAspectRatio);
+                        startHeight = (bitmap.getHeight() - imageHeight) / 2;
+                    } // Image is too wide
+                    else if(imageAspectRatio < displayAspectRatio) {
+                        imageWidth = (int)(imageHeight / displayAspectRatio);
+                        startWidth = (bitmap.getWidth() - imageWidth) / 2;
+                    }
+
+                    bitmap = Bitmap.createBitmap(bitmap, startWidth, startHeight, imageWidth, imageHeight);
+                    this.bitmap = bitmap;
+
+                    FileOutputStream outputStream = context.openFileOutput(filename, MODE_PRIVATE);
+                    boolean result = bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
                     outputStream.close();
-                    return true;
+
+                    return result;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -247,21 +315,22 @@ public class WallpaperManager {
         }
 
         public boolean setWallpaper(Context context) {
-            try {
-                File file = context.getFileStreamPath(filename);
-                FileInputStream inputStream = new FileInputStream(file);
+            if(bitmap != null) {
                 android.app.WallpaperManager wallpaperManager = android.app.WallpaperManager.getInstance(context);
-                wallpaperManager.setStream(inputStream);
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
+                try {
+                    wallpaperManager.setBitmap(bitmap);
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+            return false;
         }
 
         public void clearWallpaper(Context context) {
             File file = context.getFileStreamPath(filename);
             file.delete();
+            bitmap = null;
         }
 
         boolean isWallpaperChosen(Context context) {
@@ -289,9 +358,7 @@ public class WallpaperManager {
             time = new WallpaperTime(minutes);
         }
 
-        public Bitmap getBitmap(Context context) {
-            String absolutePath = context.getFileStreamPath(filename).getAbsolutePath();
-            Bitmap bitmap = BitmapFactory.decodeFile(absolutePath);
+        public Bitmap getBitmap() {
             return bitmap;
         }
 

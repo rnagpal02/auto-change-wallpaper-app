@@ -19,17 +19,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:gravity="center"
-                    android:text="TextView" />
-
+                    android:gravity="center" />
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/preview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"
-                    android:scaleType="center"
+                    android:scaleType="fitCenter"
                     app:shapeAppearanceOverlay="@style/WallpaperImage.Corner" />
 
                 <LinearLayout
@@ -45,8 +41,6 @@
                             style="@style/Widget.Material3.Button.IconButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_toLeftOf="@+id/set"
-                            android:layout_alignBottom="@+id/set"
                             app:iconSize="24dp"
                             app:icon="@drawable/upload_48px" />
                         <Space
@@ -58,8 +52,6 @@
                             style="@style/Widget.Material3.Button.IconButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_toLeftOf="@+id/clear"
-                            android:layout_alignBottom="@+id/clear"
                             app:iconSize="24dp"
                             app:icon="@drawable/wallpaper_48px" />
                         <Space
@@ -71,8 +63,6 @@
                             style="@style/Widget.Material3.Button.IconButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_below="@+id/preview"
-                            android:layout_alignRight="@+id/preview"
                             app:iconSize="24dp"
                             app:icon="@drawable/delete_48px" />
                         <Space

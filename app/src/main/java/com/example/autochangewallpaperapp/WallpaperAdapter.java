@@ -2,7 +2,6 @@ package com.example.autochangewallpaperapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.imageview.ShapeableImageView;
 
 public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.WallpaperViewHolder> {
-    private Context context;
-    private OnClickListeners onClickListeners;
+    private final Context context;
+    private final OnClickListeners onClickListeners;
 
     public WallpaperAdapter(Context context, OnClickListeners onClickListeners) {
         this.context = context;
@@ -33,14 +32,14 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
     protected class WallpaperViewHolder extends RecyclerView.ViewHolder {
         private final double PREVIEW_SCALE = 0.5;
 
-        private WallpaperManager wallpaperManager;
+        private final WallpaperManager wallpaperManager;
         private int position;
-        private TextView name;
-        private ShapeableImageView preview;
-        private Button choose;
-        private Button clear;
-        private Button set;
-        private Button time;
+        private final TextView name;
+        private final ShapeableImageView preview;
+        private final Button choose;
+        private final Button clear;
+        private final Button set;
+        private final Button time;
 
         public WallpaperViewHolder(View itemView) {
             super(itemView);
@@ -57,26 +56,16 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
         public void onBindViewHolder(int position) {
             this.position = position;
 
-            // Set width and height of imageview
-            int imageWidth = (int)(context.getResources().getDisplayMetrics().widthPixels * PREVIEW_SCALE);
-            int imageHeight = (int)(context.getResources().getDisplayMetrics().heightPixels * PREVIEW_SCALE);
-            preview.getLayoutParams().width = imageWidth;
-            preview.getLayoutParams().height = imageHeight;
+            // Set preview size based on scale and screen size
+            int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+            int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+            preview.getLayoutParams().width = (int)(screenWidth * PREVIEW_SCALE);
+            preview.getLayoutParams().height = (int)(screenHeight * PREVIEW_SCALE);
 
-            // Rotate image to portrait view
-            Bitmap bitmap = wallpaperManager.getBitmap(context, position);
+            // Set preview from bitmap
+            Bitmap bitmap = wallpaperManager.getBitmap(position);
             if(bitmap != null) {
-                if (bitmap.getWidth() > bitmap.getHeight()) {
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(90);
-                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                }
-
-                // Scale image so one dimension fits perfectly in view, and second dimension is at least as big as view
-                double widthScale = (double) (imageWidth) / (double) (bitmap.getWidth());
-                double heightScale = (double) imageHeight / (double) bitmap.getHeight();
-                double scale = Double.max(widthScale, heightScale);
-                preview.setImageBitmap(Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * scale), (int) (bitmap.getHeight() * scale), true));
+                preview.setImageBitmap(bitmap);
             }
 
             choose.setOnClickListener(chooseWallpaperListener);

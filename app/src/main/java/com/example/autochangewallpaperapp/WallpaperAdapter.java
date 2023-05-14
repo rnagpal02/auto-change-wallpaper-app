@@ -66,6 +66,8 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
             Bitmap bitmap = wallpaperManager.getBitmap(position);
             if(bitmap != null) {
                 preview.setImageBitmap(bitmap);
+            } else {
+                preview.setImageResource(android.R.color.transparent);
             }
 
             choose.setOnClickListener(chooseWallpaperListener);

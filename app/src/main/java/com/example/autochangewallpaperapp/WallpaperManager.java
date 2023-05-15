@@ -252,6 +252,7 @@ public class WallpaperManager {
         public boolean downloadWallpaper(Context context, Uri uri) {
             if(uri != null) {
                 try {
+                    // Get image bitmap from URI
                     InputStream inputStream = context.getContentResolver().openInputStream(uri);
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                     if(bitmap == null) {
@@ -259,10 +260,12 @@ public class WallpaperManager {
                         return false;
                     }
 
+                    // get EXIF data from image
                     inputStream = context.getContentResolver().openInputStream(uri);
                     ExifInterface exifInterface = new ExifInterface(inputStream);
                     inputStream.close();
 
+                    // Find rotation (in degrees) of image using EXIF data
                     int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
                     int rotation;
                     switch(orientation) {
@@ -280,29 +283,33 @@ public class WallpaperManager {
                             break;
                     }
 
+                    // Rotate bitmap using rotation matrix
                     Matrix matrix = new Matrix();
                     matrix.postRotate(rotation);
                     bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
+                    // Find aspect ratios
                     int imageHeight = bitmap.getHeight();
                     int imageWidth = bitmap.getWidth();
                     float imageAspectRatio = (float)(imageHeight) / (float)(imageWidth);
                     float displayAspectRatio = (float)(context.getResources().getDisplayMetrics().heightPixels) / (float)(context.getResources().getDisplayMetrics().widthPixels);
                     int startHeight = 0, startWidth = 0;
 
-                    // Image is too tall
+                    // Image is too tall, crop top and bottom
                     if(imageAspectRatio > displayAspectRatio) {
                         imageHeight = (int)(imageWidth * displayAspectRatio);
                         startHeight = (bitmap.getHeight() - imageHeight) / 2;
-                    } // Image is too wide
+                    } // Image is too wide, crop left and right
                     else if(imageAspectRatio < displayAspectRatio) {
                         imageWidth = (int)(imageHeight / displayAspectRatio);
                         startWidth = (bitmap.getWidth() - imageWidth) / 2;
                     }
 
+                    // Perform crop
                     bitmap = Bitmap.createBitmap(bitmap, startWidth, startHeight, imageWidth, imageHeight);
                     this.bitmap = bitmap;
 
+                    // Download image to local app-specific external storage
                     File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
                     FileOutputStream outputStream = new FileOutputStream(file);
                     boolean result = bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);

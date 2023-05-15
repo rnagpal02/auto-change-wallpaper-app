@@ -7,15 +7,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.TimePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 
 public class MainActivity extends AppCompatActivity implements WallpaperAdapter.OnClickListeners {
     private final String PREFERENCES_FIRST_RUN_KEY = "first_run";
@@ -124,17 +125,27 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
 
     @Override
     public void onTimeClick(int position) {
+        // Get wallpaper's current time
         WallpaperTime currentTime = wallpaperManager.getTime(position);
-        int finalTargetWallpaper = position;
-        TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+
+        // Setup properties of timepicker
+        MaterialTimePicker.Builder builder = new MaterialTimePicker.Builder();
+        builder.setHour(currentTime.hour);
+        builder.setMinute(currentTime.minute);
+        builder.setTimeFormat(TimeFormat.CLOCK_12H);
+        builder.setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK);
+
+        // Show time picker dialog
+        MaterialTimePicker timePicker = builder.build();
+        timePicker.show(getSupportFragmentManager(), "TimePicker");
+        timePicker.addOnPositiveButtonClickListener(new View.OnClickListener() {
             @Override
-            public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                WallpaperTime time = new WallpaperTime(hour, minute);
-                wallpaperManager.setTime(MainActivity.this, finalTargetWallpaper, time);
-                adapter.notifyItemChanged(finalTargetWallpaper);
+            public void onClick(View v) {
+                WallpaperTime time = new WallpaperTime(timePicker.getHour(), timePicker.getMinute());
+                wallpaperManager.setTime(MainActivity.this, position, time);
+                adapter.notifyItemChanged(position);
             }
-        }, currentTime.hour, currentTime.minute, false);
-        timePickerDialog.show();
+        });
     }
 
     private final CompoundButton.OnCheckedChangeListener autoChangeListener = new CompoundButton.OnCheckedChangeListener() {

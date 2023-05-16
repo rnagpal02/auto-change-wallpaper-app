@@ -24,6 +24,7 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
 
     public interface OnClickListeners {
         void onChooseClick(int position);
+        void onDownloadClick(int position);
         void onClearClick(int position);
         void onSetClick(int position);
         void onTimeClick(int position);
@@ -37,6 +38,7 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
         private final TextView name;
         private final ShapeableImageView preview;
         private final Button choose;
+        private final Button download;
         private final Button clear;
         private final Button set;
         private final Button time;
@@ -48,6 +50,7 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
             name = itemView.findViewById(R.id.name);
             preview = itemView.findViewById(R.id.preview);
             choose = itemView.findViewById(R.id.choose);
+            download = itemView.findViewById(R.id.download);
             clear = itemView.findViewById(R.id.clear);
             set = itemView.findViewById(R.id.set);
             time = itemView.findViewById(R.id.time);
@@ -69,6 +72,7 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
             }
 
             choose.setOnClickListener(chooseWallpaperListener);
+            download.setOnClickListener(downloadWallpaperListener);
             clear.setOnClickListener(clearWallpaperListener);
             set.setOnClickListener(setWallpaperListener);
 
@@ -90,6 +94,12 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
         private final View.OnClickListener chooseWallpaperListener = new View.OnClickListener() {
             public void onClick(View v) {
                 onClickListeners.onChooseClick(position);
+            }
+        };
+        private final View.OnClickListener downloadWallpaperListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickListeners.onDownloadClick(position);
             }
         };
         private final View.OnClickListener clearWallpaperListener = new View.OnClickListener() {

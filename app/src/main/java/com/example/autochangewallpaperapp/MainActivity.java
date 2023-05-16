@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
             return;
         }
 
-        boolean isOk = wallpaperManager.downloadWallpaper(MainActivity.this, targetWallpaper, uri);
+        boolean isOk = wallpaperManager.uploadWallpaper(MainActivity.this, targetWallpaper, uri);
         if(!isOk) {
             Toast.makeText(MainActivity.this, "Error downloading wallpaper", Toast.LENGTH_SHORT).show();
             return;
@@ -107,6 +107,14 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
         adapter.notifyItemChanged(targetWallpaper);
         updateUI();
     });
+
+    @Override
+    public void onDownloadClick(int position) {
+        boolean isOk = wallpaperManager.downloadWallpaper(position);
+        if(!isOk) {
+            Toast.makeText(MainActivity.this, "Unable to download wallpaper", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     public void onClearClick(int position) {

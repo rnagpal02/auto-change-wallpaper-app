@@ -144,8 +144,12 @@ public class WallpaperManager {
         return wallpapers[index].isWallpaperChosen(context);
     }
 
-    public boolean downloadWallpaper(Context context, int index, Uri uri) {
-        return wallpapers[index].downloadWallpaper(context, uri);
+    public boolean uploadWallpaper(Context context, int index, Uri uri) {
+        return wallpapers[index].uploadWallpaper(context, uri);
+    }
+
+    public boolean downloadWallpaper(int index) {
+        return wallpapers[index].downloadWallpaper();
     }
 
     public boolean setWallpaper(Context context, int index) {
@@ -281,7 +285,8 @@ public class WallpaperManager {
             }
         }
 
-        public boolean downloadWallpaper(Context context, Uri uri) {
+        public boolean uploadWallpaper(Context context, Uri uri) {
+            boolean result = false;
             if(uri != null) {
                 try {
                     // Get image bitmap from URI
@@ -345,14 +350,34 @@ public class WallpaperManager {
                     // Download image to local app-specific external storage
                     File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
                     FileOutputStream outputStream = new FileOutputStream(file);
-                    boolean result = bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+                    result = bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
                     outputStream.close();
                     return result;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            return false;
+            return result;
+        }
+
+        public boolean downloadWallpaper() {
+            boolean result = false;
+            if(bitmap != null) {
+                try {
+                    // Download to public downloads directory
+                    File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                    if(!downloadDirectory.exists()) {
+                        downloadDirectory.mkdirs();
+                    }
+                    File downloadFile = new File(downloadDirectory, filename + ".png");
+                    FileOutputStream outputStream = new FileOutputStream(downloadFile);
+                    result = bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+                    outputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return result;
         }
 
         public boolean setWallpaper(Context context) {

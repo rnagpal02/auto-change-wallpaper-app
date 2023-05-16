@@ -10,9 +10,12 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
+import android.view.WindowManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +32,8 @@ public class WallpaperManager {
 
     private Wallpaper[] wallpapers;
     private int numWallpapers;
+    private int displayWidth;
+    private int displayHeight;
 
     private WallpaperManager() {}
 
@@ -42,6 +47,7 @@ public class WallpaperManager {
         for(int i = 0; i < numWallpapers; ++i) {
             wallpapers[i] = new Wallpaper(context, defaultWallpaperTimes[i], i);
         }
+        findDisplaySize(context);
     }
 
     public void initWallpapers(Context context) {
@@ -50,6 +56,7 @@ public class WallpaperManager {
         for(int i = 0; i < numWallpapers; ++i) {
             wallpapers[i] = new Wallpaper(context, i);
         }
+        findDisplaySize(context);
     }
 
     public boolean startAutoChange(Context context) {
@@ -149,6 +156,14 @@ public class WallpaperManager {
         wallpapers[index].clearWallpaper(context);
     }
 
+    public int getDisplayWidth() {
+        return displayWidth;
+    }
+
+    public int getDisplayHeight() {
+        return displayHeight;
+    }
+
     public WallpaperTime getTime(int index) {
         return wallpapers[index].getTime();
     }
@@ -167,6 +182,23 @@ public class WallpaperManager {
 
     public int getNumWallpapers() {
         return numWallpapers;
+    }
+
+    private void findDisplaySize(Context context) {
+        // This gets maximum screen size application may take
+        // This may not always provide the accurate display size
+        // Getting this varies based on API level
+        WindowManager windowManager = context.getSystemService(WindowManager.class);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            Rect screen = windowManager.getMaximumWindowMetrics().getBounds();
+            displayWidth = screen.width();
+            displayHeight = screen.height();
+        } else {
+            Point point = new Point();
+            windowManager.getDefaultDisplay().getRealSize(point);
+            displayWidth = point.x;
+            displayHeight = point.y;
+        }
     }
 
     private void setNumWallpapers(Context context, int numWallpapers) {
@@ -292,7 +324,8 @@ public class WallpaperManager {
                     int imageHeight = bitmap.getHeight();
                     int imageWidth = bitmap.getWidth();
                     float imageAspectRatio = (float)(imageHeight) / (float)(imageWidth);
-                    float displayAspectRatio = (float)(context.getResources().getDisplayMetrics().heightPixels) / (float)(context.getResources().getDisplayMetrics().widthPixels);
+
+                    float displayAspectRatio = (float)(getDisplayHeight()) / (float)(getDisplayWidth());
                     int startHeight = 0, startWidth = 0;
 
                     // Image is too tall, crop top and bottom

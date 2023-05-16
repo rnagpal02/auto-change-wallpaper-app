@@ -56,11 +56,9 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
         public void onBindViewHolder(int position) {
             this.position = position;
 
-            // Set preview size based on scale and screen size
-            int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-            int screenHeight = context.getResources().getDisplayMetrics().heightPixels;
-            preview.getLayoutParams().width = (int)(screenWidth * PREVIEW_SCALE);
-            preview.getLayoutParams().height = (int)(screenHeight * PREVIEW_SCALE);
+            // Set preview size based on scale and display size
+            preview.getLayoutParams().width = (int)(wallpaperManager.getDisplayWidth() * PREVIEW_SCALE);
+            preview.getLayoutParams().height = (int)(wallpaperManager.getDisplayHeight() * PREVIEW_SCALE);
 
             // Set preview from bitmap
             Bitmap bitmap = wallpaperManager.getBitmap(position);

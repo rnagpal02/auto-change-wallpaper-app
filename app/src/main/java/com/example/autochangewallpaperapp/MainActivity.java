@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        wallpaperManager = com.example.autochangewallpaperapp.WallpaperManager.getWallpaperManager();
+        wallpaperManager = WallpaperManager.getWallpaperManager();
 
         wallpaperRecycler = findViewById(R.id.wallpaperRecycler);
         wallpaperRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));

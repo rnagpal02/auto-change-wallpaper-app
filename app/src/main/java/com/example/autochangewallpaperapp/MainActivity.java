@@ -4,16 +4,19 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
     private final String PREFERENCES_AUTO_CHANGE_KEY = "auto_change";
 
     com.example.autochangewallpaperapp.WallpaperManager wallpaperManager; // TODO change class name
+    private MaterialToolbar toolbar;
     private RecyclerView wallpaperRecycler;
     private WallpaperAdapter adapter;
     private MaterialSwitch autoChangeWallpaper;
@@ -34,6 +38,10 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
         setContentView(R.layout.activity_main);
 
         wallpaperManager = WallpaperManager.getWallpaperManager();
+
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(navigationClickListener);
+        toolbar.setOnMenuItemClickListener(menuItemClickListener);
 
         wallpaperRecycler = findViewById(R.id.wallpaperRecycler);
         wallpaperRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -73,6 +81,29 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
         boolean default_value = false;
         autoChangeWallpaper.setChecked(preferences.getBoolean(PREFERENCES_AUTO_CHANGE_KEY, default_value));
     }
+
+    private View.OnClickListener navigationClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // TODO implement side bar for navigation
+        }
+    };
+
+    private Toolbar.OnMenuItemClickListener menuItemClickListener = new Toolbar.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            final String TAG = "MENU_CLICK_LISTENER";
+            switch (item.getItemId()) {
+                case R.id.edit:
+                    // TODO implement editing mode
+                    break;
+                default:
+                    Log.e(TAG, "Unhandled menu item clicked");
+                    break;
+            }
+            return false;
+        }
+    };
 
     @Override
     public void onChooseClick(int position) {

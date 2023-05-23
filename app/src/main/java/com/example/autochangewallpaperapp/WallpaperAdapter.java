@@ -2,6 +2,8 @@ package com.example.autochangewallpaperapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,11 +61,12 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
 
             // Set preview from bitmap
             Bitmap bitmap = wallpaperManager.getBitmap(position);
-            if(bitmap != null) {
-                preview.setImageBitmap(bitmap);
-            } else {
-                preview.setImageResource(android.R.color.transparent);
+            if(bitmap == null) {
+                bitmap = Bitmap.createBitmap(wallpaperManager.getDisplayWidth(), wallpaperManager.getDisplayHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                canvas.drawColor(Color.TRANSPARENT);
             }
+            preview.setImageBitmap(bitmap);
 
             choose.setOnClickListener(chooseWallpaperListener);
             download.setOnClickListener(downloadWallpaperListener);

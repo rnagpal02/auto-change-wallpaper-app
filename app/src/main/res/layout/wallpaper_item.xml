@@ -4,11 +4,12 @@
     style="@style/Widget.Material3.CardView.Elevated"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="12dp">
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp" >
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:gravity="center|top"
             android:orientation="vertical">
@@ -16,7 +17,7 @@
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/name"
                     style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:gravity="center" />
@@ -25,8 +26,10 @@
                     android:id="@+id/preview"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
-                    app:shapeAppearanceOverlay="@style/WallpaperImage.Corner" />
+                    app:shapeAppearanceOverlay="@style/WallpaperImage.Corner"
+                    android:layout_weight="1" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

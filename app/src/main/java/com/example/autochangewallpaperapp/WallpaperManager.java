@@ -41,11 +41,11 @@ public class WallpaperManager {
         return wallpaperManager;
     }
 
-    public void createDefaults(Context context, WallpaperTime[] defaultWallpaperTimes) {
-        setNumWallpapers(context, defaultWallpaperTimes.length);
+    public void createDefaults(Context context, WallpaperProperties[] defaultWallpaperProperties) {
+        setNumWallpapers(context, defaultWallpaperProperties.length);
         wallpapers = new Wallpaper[numWallpapers];
         for(int i = 0; i < numWallpapers; ++i) {
-            wallpapers[i] = new Wallpaper(context, defaultWallpaperTimes[i], i);
+            wallpapers[i] = new Wallpaper(context, i, defaultWallpaperProperties[i]);
         }
         findDisplaySize(context);
     }
@@ -168,6 +168,10 @@ public class WallpaperManager {
         return displayHeight;
     }
 
+    public String getName(int index) {
+        return wallpapers[index].getName();
+    }
+
     public WallpaperTime getTime(int index) {
         return wallpapers[index].getTime();
     }
@@ -247,27 +251,32 @@ public class WallpaperManager {
     private class Wallpaper {
         private final String FILENAME_PREFIX = "wallpaper_";
         private final String PREFERENCES_TIME = "/time";
+        private final String PREFERENCES_NAME = "/name";
 
         private final String filename;
+        private final String preferencesTimeKey;
+        private final String preferencesNameKey;
+        private String name;
         private Bitmap bitmap;
         private WallpaperTime time;
-        private final String preferencesTimeKey;
 
-        public Wallpaper(Context context, WallpaperTime time, int index) {
+
+        public Wallpaper(Context context, int index, WallpaperProperties properties) {
             filename = FILENAME_PREFIX + index;
             preferencesTimeKey = filename + PREFERENCES_TIME;
+            preferencesNameKey = filename + PREFERENCES_NAME;
 
-            if(time != null) {
-                setTime(context, time);
+            if(properties != null) {
+                setProperties(context, properties);
             } else {
-                recoverTime(context);
+                recoverProperties(context);
             }
 
             checkImage(context);
         }
 
         public Wallpaper(Context context, int index) {
-            this(context, null, index);
+            this(context, index, null);
         }
 
         public void checkImage(Context context) {
@@ -404,23 +413,39 @@ public class WallpaperManager {
             return file.exists();
         }
 
+        public String getName() {
+            return name;
+        }
+
         public WallpaperTime getTime() {
             return time;
         }
 
         public void setTime(Context context, WallpaperTime time) {
             this.time = time;
-            int minutes = time.getTimeMinutes();
             SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_FILENAME, MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putInt(preferencesTimeKey, minutes);
+            editor.putInt(preferencesTimeKey, time.getTimeMinutes());
             editor.apply();
         }
 
-        public void recoverTime(Context context) {
+        public void setProperties(Context context, WallpaperProperties properties) {
+            this.name = properties.getName();
+            this.time = properties.getTime();
             SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_FILENAME, MODE_PRIVATE);
-            int default_value = 0;
-            int minutes = preferences.getInt(preferencesTimeKey, default_value);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(preferencesNameKey, name);
+            editor.putInt(preferencesTimeKey, time.getTimeMinutes());
+            editor.apply();
+        }
+
+
+        public void recoverProperties(Context context) {
+            SharedPreferences preferences = context.getSharedPreferences(PREFERENCES_FILENAME, MODE_PRIVATE);
+            String default_str = "";
+            int default_int = 0;
+            name = preferences.getString(preferencesNameKey, default_str);
+            int minutes = preferences.getInt(preferencesTimeKey, default_int);
             time = new WallpaperTime(minutes);
         }
 

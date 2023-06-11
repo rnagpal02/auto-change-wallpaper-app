@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
         if(is_first_run) {
             Log.d(TAG, "First run");
 
-            wallpaperManager.createDefaults(MainActivity.this, WallpaperDefaultTimes.DEFAULT_MORNING_AFTERNOON_EVENING_NIGHT_TIMES);
+            wallpaperManager.createDefaults(MainActivity.this, WallpaperDefaultProperties.DEFAULT_MORNING_AFTERNOON_EVENING_NIGHT_PROPERTIES);
 
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(PREFERENCES_AUTO_CHANGE_KEY, false);

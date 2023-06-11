@@ -85,7 +85,7 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
             time.setText(timeText);
             time.setOnClickListener(timeWallpaperListener);
 
-            name.setText("Wallpaper " + position);
+            name.setText(wallpaperManager.getName(position));
         }
 
         private final View.OnClickListener chooseWallpaperListener = new View.OnClickListener() {

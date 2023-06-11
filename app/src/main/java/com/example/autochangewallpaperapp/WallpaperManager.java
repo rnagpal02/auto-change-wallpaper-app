@@ -378,7 +378,7 @@ public class WallpaperManager {
                     if(!downloadDirectory.exists()) {
                         downloadDirectory.mkdirs();
                     }
-                    File downloadFile = new File(downloadDirectory, filename + ".png");
+                    File downloadFile = new File(downloadDirectory, name + ".png");
                     FileOutputStream outputStream = new FileOutputStream(downloadFile);
                     result = bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
                     outputStream.close();

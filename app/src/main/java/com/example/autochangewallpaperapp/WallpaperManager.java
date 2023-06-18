@@ -229,7 +229,7 @@ public class WallpaperManager {
         PendingIntent pendingIntent = getBroadcastPendingIntent(context, intent);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC, timeMillis, pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC, timeMillis, pendingIntent);
     }
 
     private void cancelAlarm(Context context) {

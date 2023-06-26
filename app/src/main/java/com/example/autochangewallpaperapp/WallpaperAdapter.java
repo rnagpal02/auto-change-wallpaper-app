@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -18,10 +19,16 @@ import com.google.android.material.imageview.ShapeableImageView;
 public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.WallpaperViewHolder> {
     private final Context context;
     private final OnClickListeners onClickListeners;
+    private int itemWidth;
 
     public WallpaperAdapter(Context context, OnClickListeners onClickListeners) {
         this.context = context;
         this.onClickListeners = onClickListeners;
+        itemWidth = 0;
+    }
+
+    public int getItemWidth() {
+        return itemWidth;
     }
 
     public interface OnClickListeners {
@@ -86,6 +93,19 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
             time.setOnClickListener(timeWallpaperListener);
 
             name.setText(wallpaperManager.getName(position));
+
+            // Get itemWidth if it's at default value
+            // This is used to set extra margin to center first and last item
+            if(itemWidth == 0) {
+                itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        itemWidth = itemView.getWidth();
+                        itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        notifyItemChanged(position);
+                    }
+                });
+            }
         }
 
         private final View.OnClickListener chooseWallpaperListener = new View.OnClickListener() {

@@ -3,12 +3,16 @@ package com.example.autochangewallpaperapp;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -37,19 +41,42 @@ public class MainActivity extends AppCompatActivity implements WallpaperAdapter.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Instance of singleton class
         wallpaperManager = WallpaperManager.getWallpaperManager();
 
+        // Setup toolbar
         toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(navigationClickListener);
         toolbar.setOnMenuItemClickListener(menuItemClickListener);
 
+        // Setup recycler view
         wallpaperRecycler = findViewById(R.id.wallpaperRecycler);
         wallpaperRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         adapter = new WallpaperAdapter(this, this);
         wallpaperRecycler.setAdapter(adapter);
 
-        autoChangeWallpaper = findViewById(R.id.autoChangeSwitch);
+        // Scroll one item at a time
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(wallpaperRecycler);
 
+        // Add padding to center first and last item
+        wallpaperRecycler.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                super.getItemOffsets(outRect, view, parent, state);
+
+                int itemOffset = (wallpaperManager.getDisplayWidth() - adapter.getItemWidth()) / 2;
+                int itemPosition = parent.getChildAdapterPosition(view);
+                if(itemPosition == 0) {
+                    outRect.left = itemOffset;
+                } else if(itemPosition == state.getItemCount() - 1) {
+                    outRect.right = itemOffset;
+                }
+            }
+        });
+
+        // Setup auto changing toggle
+        autoChangeWallpaper = findViewById(R.id.autoChangeSwitch);
         autoChangeWallpaper.setOnCheckedChangeListener(autoChangeListener);
 
         checkFirstRun();
